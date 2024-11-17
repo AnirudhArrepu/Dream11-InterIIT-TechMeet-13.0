@@ -125,10 +125,10 @@ for filename in os.listdir(directory):
                                         if len(fielders) > 1:
                                             # Indirect run-out for multiple fielders
                                             for fielder in fielders:
-                                            if "name" in fielders:
-                                                fielder_name = fielder["name"]
-                                                initialize_player(fielder_name)
-                                                players_stats[fielder_name]["indirect_run_out"] += 1
+                                                if "name" in fielders:
+                                                    fielder_name = fielder["name"]
+                                                    initialize_player(fielder_name)
+                                                    players_stats[fielder_name]["indirect_run_out"] += 1
                                         elif len(fielders)==1:
                                             if "name" in fielders[0]:
                                                 fielder_name = fielders[0]["name"]
