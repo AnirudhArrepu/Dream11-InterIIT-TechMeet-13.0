@@ -129,9 +129,10 @@ for filename in os.listdir(directory):
                                                 initialize_player(fielder_name)
                                                 players_stats[fielder_name]["indirect_run_out"] += 1
                                         elif len(fielders)==1:
-                                            fielder_name = fielders[0]["name"]
-                                            initialize_player(fielder_name)  # Ensure the fielder is initialized
-                                            players_stats[fielder_name]["run_outs"] += 1
+                                            if "name" in fielders:
+                                                fielder_name = fielders[0]["name"]
+                                                initialize_player(fielder_name)  # Ensure the fielder is initialized
+                                                players_stats[fielder_name]["run_outs"] += 1
                                         else:
                                             players_stats[bowler]["run_outs"]+=1
 
