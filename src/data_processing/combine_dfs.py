@@ -13,6 +13,7 @@ combined_dataframe = None
 # Loop through all files in the directory
 for filename in os.listdir(csv_directory):
     if filename.endswith(".csv"):
+        print(filename)
         # Construct full file path
         file_path = os.path.join(csv_directory, filename)
         
@@ -26,7 +27,7 @@ for filename in os.listdir(csv_directory):
             # Join with the existing DataFrame
             combined_dataframe = combined_dataframe.join(df, how='outer', rsuffix=f"_{filename}")
 
-combined_dataframe.sort_values(by='player_name', inplace=True)
+combined_dataframe.sort_values(by=['Player', 'Match Type'], inplace=True)
 
 # Save the combined DataFrame to a new CSV file if needed
 output_file = "combined_output.csv"

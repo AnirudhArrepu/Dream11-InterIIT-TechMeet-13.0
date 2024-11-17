@@ -36,7 +36,7 @@ for filename in os.listdir(directory):
                 players_stats = {}
 
                 # Helper function to initialize player stats
-                def initialize_player(player_name, player_team):
+                def initialize_player(player_name, player_team, sub):
                     if player_name not in players_stats:
                         players_stats[player_name] = {
                             "runs": 0,
@@ -52,12 +52,16 @@ for filename in os.listdir(directory):
                             "indirect_run_out": 0,
                             "maiden_overs": 0,
                             "team_name": player_team,
+                            "substitute": sub,
                         }
 
-                player_list = data["players"]
+                player_list = data["info"]["players"]
+                print(player_list)
                 for team in player_list:
-                    for player in team:
-                        initialize_player(player, team)
+                    print(team)
+                    for player in player_list[team]:
+                        print(player)
+                        initialize_player(player, team, False)
 
                 # Parse innings
                 for inning in data.get("innings", []):
@@ -89,7 +93,7 @@ for filename in os.listdir(directory):
 
                             # Bowling stats
                             bowler = delivery["bowler"]
-                            initialize_player(bowler)
+                            # initialize_player(bowler)
                             bowlers_runs = delivery["runs"]["total"]
                             total_runs_in_over += bowlers_runs  # Track total runs in the over
 
@@ -106,13 +110,18 @@ for filename in os.listdir(directory):
                                         fielders = wicket.get("fielders", [])
                                         if fielders and "name" in fielders[0]:
                                             fielder_name = fielders[0]["name"]
-                                            initialize_player(fielder_name)
+                                            # initialize_player(fielder_name)
+                                            if fielder_name not in players_stats:
+                                                initialize_player(fielder_name, players_stats[bowler]["team_name"], True)
+
                                             players_stats[fielder_name]["caught"] += 1
                                         else:
                                             # Log or handle cases where 'name' is not present
                                             print(f"Warning: Malformed fielder data in delivery: {delivery}")
 
-                                        initialize_player(fielder_name)
+                                        # initialize_player(fielder_name)
+                                        if fielder_name not in players_stats:
+                                            initialize_player(fielder_name, players_stats[bowler]["team_name"], True)
                                         players_stats[fielder_name]["caught"] += 1
 
                                         # Credit the bowler with a wicket
@@ -133,12 +142,16 @@ for filename in os.listdir(directory):
                                             for fielder in fielders:
                                                 if "name" in fielders:
                                                     fielder_name = fielder["name"]
-                                                    initialize_player(fielder_name)
+                                                    if fielder_name not in players_stats:
+                                                        initialize_player(fielder_name, players_stats[bowler]["team_name"], True)
+                                                    # initialize_player(fielder_name)
                                                     players_stats[fielder_name]["indirect_run_out"] += 1
                                         elif len(fielders)==1:
                                             if "name" in fielders[0]:
                                                 fielder_name = fielders[0]["name"]
-                                                initialize_player(fielder_name)  # Ensure the fielder is initialized
+                                                if fielder_name not in players_stats:
+                                                    initialize_player(fielder_name, players_stats[bowler]["team_name"], True)
+                                                # initialize_player(fielder_name)  # Ensure the fielder is initialized
                                                 players_stats[fielder_name]["run_outs"] += 1
                                         else:
                                             players_stats[bowler]["run_outs"]+=1
@@ -150,7 +163,7 @@ for filename in os.listdir(directory):
 
                         # Append run_per_over for batters in the current over
                         for player, runs in runs_in_over.items():
-                            initialize_player(player)
+                            # initialize_player(player)
                             if len(players_stats[player]["run_per_over"]) <= over_number:
                                 players_stats[player]["run_per_over"].extend([0] * (over_number + 1 - len(players_stats[player]["run_per_over"])))
                             players_stats[player]["run_per_over"][over_number] += runs
@@ -281,6 +294,8 @@ for filename in os.listdir(directory):
                     print(match_name)
 
                     for player, stats in players_stats.items():
+                        if(players_stats[player]["substitute"]):
+                            continue
                     
                         points = 0
                         # Map the match type to valid keys in fantasy_points
@@ -429,14 +444,17 @@ for filename in os.listdir(directory):
 
                 match_date = data["info"]["dates"][0]
                 match_city = data["info"]["venue"]
-                team1, team2 = data["info"]["teams"]
 
                 df_fantasy_points["Match Date"] = match_date
-                df_fantasy_points["City"] = match_city
-                df_fantasy_points["Team1"] = team1
-                df_fantasy_points["Team2"] = team2
-                df_fantasy_points["Match Type"] = data["info"]["match_type"].lower()
 
+                team_names = []
+                for player in fantasy_points_result:
+                    team_names.append(players_stats[player]["team_name"])
+
+                df_fantasy_points["Team"] = team_names
+
+                df_fantasy_points["City"] = match_city
+                df_fantasy_points["Match Type"] = data["info"]["match_type"].lower()
                 # Display the DataFrame
                 # print(df_fantasy_points)
 
