@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 import os
-import datetime
+from datetime import datetime
 
 
 directory = '../data/raw/cricksheet/cricsheet-raw'
