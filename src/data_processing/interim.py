@@ -36,7 +36,7 @@ for filename in os.listdir(directory):
                 players_stats = {}
 
                 # Helper function to initialize player stats
-                def initialize_player(player_name):
+                def initialize_player(player_name, player_team):
                     if player_name not in players_stats:
                         players_stats[player_name] = {
                             "runs": 0,
@@ -50,8 +50,14 @@ for filename in os.listdir(directory):
                             "run_outs": 0,
                             "lbw": 0,
                             "indirect_run_out": 0,
-                            "maiden_overs": 0  # Initialize maiden overs
+                            "maiden_overs": 0,
+                            "team_name": player_team,
                         }
+
+                player_list = data["players"]
+                for team in player_list:
+                    for player in team:
+                        initialize_player(player, team)
 
                 # Parse innings
                 for inning in data.get("innings", []):
@@ -63,7 +69,7 @@ for filename in os.listdir(directory):
                         for delivery in over_data["deliveries"]:
                             # Batting stats
                             batter = delivery["batter"]
-                            initialize_player(batter)
+                            # initialize_player(batter)
 
                             # Increment balls faced for the batter
                             players_stats[batter]["balls_faced"] += 1

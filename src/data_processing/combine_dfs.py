@@ -4,6 +4,9 @@ import os
 # Directory containing the CSV files
 csv_directory = "../data/raw/cricksheet/interim"
 
+output_directory = "../data/raw/cricksheet/final"
+os.makedirs(output_directory, exist_ok=True)  
+
 # Initialize an empty DataFrame
 combined_dataframe = None
 
@@ -23,8 +26,7 @@ for filename in os.listdir(csv_directory):
             # Join with the existing DataFrame
             combined_dataframe = combined_dataframe.join(df, how='outer', rsuffix=f"_{filename}")
 
-# Display the first few rows of the combined DataFrame
-print(combined_dataframe)
+combined_dataframe.sort_values(by='player_name', inplace=True)
 
 # Save the combined DataFrame to a new CSV file if needed
 output_file = "combined_output.csv"
