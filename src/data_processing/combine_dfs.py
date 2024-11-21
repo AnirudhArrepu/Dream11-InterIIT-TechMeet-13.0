@@ -1,21 +1,30 @@
 import pandas as pd
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 csv_directory = "../data/raw/cricksheet/interim"
 output_directory = "../data/raw/cricksheet/final"
-os.makedirs(output_directory, exist_ok=True)  
+os.makedirs(output_directory, exist_ok=True)
 
-combined_dataframe = pd.DataFrame() 
-
-for filename in os.listdir(csv_directory):
+def process_file(filename):
     if filename.endswith(".csv"):
-        print(filename)
+        print(f"Processing: {filename}")
         file_path = os.path.join(csv_directory, filename)
-        
-        df = pd.read_csv(file_path)
-        
-        combined_dataframe = pd.concat([combined_dataframe, df], ignore_index=True)
+        return pd.read_csv(file_path)
+    return pd.DataFrame()  # Return an empty DataFrame if the file is not a CSV
 
+# Use ThreadPoolExecutor for parallel file processing
+with ThreadPoolExecutor() as executor:
+    filenames = os.listdir(csv_directory)
+    csv_files = [filename for filename in filenames if filename.endswith(".csv")]
+    
+    # Process files in parallel
+    dataframes = list(executor.map(process_file, csv_files))
+
+# Combine all DataFrames
+combined_dataframe = pd.concat(dataframes, ignore_index=True)
+
+# Sort and save the final DataFrame
 combined_dataframe.sort_values(by=['Player'], inplace=True)
 
 output_file = os.path.join(output_directory, "combined_output.csv")

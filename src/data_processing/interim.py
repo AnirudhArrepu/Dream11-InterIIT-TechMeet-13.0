@@ -6,7 +6,7 @@ from datetime import datetime
 
 directory = '../data/raw/cricksheet/cricsheet-raw'
 output_directory = "../data/raw/cricksheet/interim"
-os.makedirs(output_directory, exist_ok=True)    
+os.makedirs(output_directory, exist_ok=True)
 
 # Loop through all files in the directory
 for filename in os.listdir(directory):
@@ -16,7 +16,7 @@ for filename in os.listdir(directory):
 
         # if(filename!='1160280.json'):
         #     continue
-        
+
         # Open and read the JSON file
         with open(file_path, 'r') as file:
             data = json.load(file)
@@ -55,6 +55,8 @@ for filename in os.listdir(directory):
                             "maiden_overs": 0,
                             "team_name": player_team,
                             "substitute": sub,
+                            "economy": 0,
+                            "strike_rate": 0,
                         }
 
                 player_list = data["info"]["players"]
@@ -298,7 +300,7 @@ for filename in os.listdir(directory):
                     for player, stats in players_stats.items():
                         if(players_stats[player]["substitute"]):
                             continue
-                    
+
                         points = 0
                         # Map the match type to valid keys in fantasy_points
                         match_name = match_name.lower()
@@ -361,11 +363,14 @@ for filename in os.listdir(directory):
                         points += stats['run_outs'] * scoring['run_out_direct']
                         points += stats['indirect_run_out'] * scoring['run_out_non_direct']
 
+                        # prev_points = points
                         # Points for economy rate (only if the player has bowled)
                         if stats["balls_faced"] > 0:
                             overs_bowled = stats['balls_faced'] / 6
                             if overs_bowled > 0:
                                 economy_rate = sum(stats['run_per_over']) / overs_bowled
+
+                                stats["economy"] = economy_rate
 
                                 if match_name != "odi":
                                     if economy_rate < 5:
@@ -394,9 +399,12 @@ for filename in os.listdir(directory):
                                     elif economy_rate >= 9:
                                         points += scoring['economy_rate']['above_9']
 
+
                         # Points for strike rate (only if the player has faced balls)
                         if stats["balls_faced"] > 0:
                             strike_rate = (stats['runs'] / stats['balls_faced']) * 100
+
+                            stats["strike_rate"] = strike_rate
 
                             if match_name != "odi":
                                 if strike_rate > 170:
@@ -424,6 +432,8 @@ for filename in os.listdir(directory):
                                     points += scoring['strike_rate']['30_to_40']
                                 elif strike_rate < 30:
                                     points += scoring['strike_rate']['below_30']
+
+                        
 
                         player_fantasy_points[player] = points
 
@@ -453,12 +463,35 @@ for filename in os.listdir(directory):
                 for player in fantasy_points_result:
                     team_names.append(players_stats[player]["team_name"])
 
+                economy_rate = []
+                for player in fantasy_points_result:
+                    economy_rate.append(players_stats[player]["economy"])
+
+                strike_rates = []
+                for player in fantasy_points_result:
+                    strike_rates.append(players_stats[player]["strike_rate"])
+
+                player_4s = []
+                for player in fantasy_points_result:
+                    player_4s.append(players_stats[player]["4"])
+
+                player_6s = []
+                for player in fantasy_points_result:
+                    player_6s.append(players_stats[player]["6"])
+
+                df_fantasy_points["Economy"] = economy_rate
+                df_fantasy_points["Strike Rate"] = strike_rates
+
+                df_fantasy_points["4s"] = player_4s
+                df_fantasy_points["6s"] = player_6s
+                
+
                 df_fantasy_points["Team"] = team_names
 
                 df_fantasy_points["City"] = match_city
                 df_fantasy_points["Match Type"] = data["info"]["match_type"].lower()
                 # Display the DataFrame
-                # print(df_fantasy_points)
+                print(df_fantasy_points)
 
 
                 #add colomns to this df based on what features to be considered about the match
