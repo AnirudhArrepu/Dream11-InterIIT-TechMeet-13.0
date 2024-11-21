@@ -1,3 +1,5 @@
 cricsheet-raw
 interim
 env
+train_model.ipynb
+training_log.log
