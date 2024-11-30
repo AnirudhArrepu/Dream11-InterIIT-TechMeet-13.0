@@ -493,9 +493,13 @@ for filename in os.listdir(directory):
                 # Display the DataFrame
                 print(df_fantasy_points)
 
+                player_codes = []
                 for index, player_name in enumerate(df_fantasy_points["Player"]):
-                  s = data["info"]["registry"]["people"][player_name]
-                  df_fantasy_points.at[index, "Player"] = s
+                    s = data["info"]["registry"]["people"][player_name]
+                #   df_fantasy_points.at[index, "Player"] = s
+                    player_codes.append(s)
+
+                df_fantasy_points["Player Code"] = player_codes
 
                 #add colomns to this df based on what features to be considered about the match
 
