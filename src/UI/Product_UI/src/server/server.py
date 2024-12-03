@@ -132,11 +132,22 @@ def getMatchData(param):
                 status = match["status"]
                 state = match["state"]
                 matchTitle = match["matchDesc"] + " of " + match["seriesName"]
+
+                if isinstance(date, str):
+                    date = int(date)
+
+                # Convert publish time from timestamp to a readable format (UTC)
+                if date:
+                    dt = datetime.fromtimestamp(date / 1000, tz=timezone.utc)
+                    formatted_date = dt.strftime('%Y-%m-%d')
+                    formatted_time = dt.strftime('%H:%M:%S')
+                
                 match = {
                     "team1": team1Name,
                     "team2": team2Name,
                     "matchFormat": matchformat,
-                    "date": date,
+                    "date": formatted_date,
+                    "time": formatted_time,
                     "stadium": stadium,
                     "status": status,
                     "state": state,
