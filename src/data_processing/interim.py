@@ -490,7 +490,7 @@ for filename in os.listdir(directory):
                 player_opponent_team_names = []
                 for player in fantasy_points_result:
                     player_team = players_stats[player]["team_name"]
-                    team_names = data["info"]["teams"]["teams"]
+                    team_names = data["info"]["teams"]
                     for team_name in team_names:
                         if(player_team != team_name):
                             player_opponent_team_names.append(team_name)
