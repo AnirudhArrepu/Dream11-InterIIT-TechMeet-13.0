@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fantasy Match Predictions</title>
+  <style>
+    /* Global Styles */
+    body {
+      margin: 0;
+      font-family: 'Roboto', Arial, sans-serif;
+      background: linear-gradient(to bottom, #1e1e1e, #292929);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: #3a3a3a;
+      padding: 20px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: #ffffff;
+      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Main Container */
+    .main-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, auto)); /* Cards keep their normal size */
+      gap: 20px;
+      justify-content: center; /* Center align horizontally */
+      align-items: center; /* Center align vertically */
+      padding: 20px;
+      flex-grow: 1; /* Push footer to the bottom */
+    }
+
+    /* Match Card */
+    .match-card {
+      width: 320px; /* Fixed width for cards */
+      background-color: #2a2a2a;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .match-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .match-info {
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #b0b0b0;
+    }
+
+    .teams {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+    }
+
+    .team {
+      text-align: center;
+    }
+
+    .team img {
+      width: 60px;
+      height: 40px;
+      border-radius: 5px;
+      margin-bottom: 8px;
+    }
+
+    .team-name {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .vs {
+      font-size: 20px;
+      font-weight: bold;
+      color: #d0d0d0;
+    }
+
+    .details {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #b0b0b0;
+    }
+
+    /* Bottom Section */
+    .bottom-section {
+      background: #3a3a3a;
+      padding: 20px;
+      text-align: center;
+      color: #ffffff;
+      font-size: 16px;
+      box-shadow: 0px -2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Footer */
+    .footer {
+      background: #2a2a2a;
+      padding: 15px;
+      text-align: center;
+      font-size: 14px;
+      color: #b0b0b0;
+      box-shadow: 0px -2px 4px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Section -->
+  <div class="header">Fantasy Match Predictions</div>
+
+  <!-- Main Content -->
+  <div class="main-container">
+    <!-- Match Card 1 -->
+    <div class="match-card">
+      <div class="match-info">6–10 Dec, 9:30 AM</div>
+      <div class="teams">
+        <div class="team">
+          <img src="https://flagcdn.com/w320/au.png" alt="Australia Flag">
+          <div class="team-name">Australia</div>
+        </div>
+        <div class="vs">vs</div>
+        <div class="team">
+          <img src="https://flagcdn.com/w320/in.png" alt="India Flag">
+          <div class="team-name">India</div>
+        </div>
+      </div>
+      <div class="details">Test 2 of 5 (IND leads 1-0)</div>
+    </div>
+
+    <!-- Match Card 2 -->
+    <div class="match-card">
+      <div class="match-info">12 Dec, 7:00 PM</div>
+      <div class="teams">
+        <div class="team">
+          <img src="https://flagcdn.com/w320/nz.png" alt="New Zealand Flag">
+          <div class="team-name">New Zealand</div>
+        </div>
+        <div class="vs">vs</div>
+        <div class="team">
+          <img src="https://flagcdn.com/w320/pk.png" alt="Pakistan Flag">
+          <div class="team-name">Pakistan</div>
+        </div>
+      </div>
+      <div class="details">ODI Series Match 3</div>
+    </div>
+
+    <div class="match-card">
+        <div class="match-info">12 Dec, 7:00 PM</div>
+        <div class="teams">
+          <div class="team">
+            <img src="https://flagcdn.com/w320/nz.png" alt="New Zealand Flag">
+            <div class="team-name">New Zealand</div>
+          </div>
+          <div class="vs">vs</div>
+          <div class="team">
+            <img src="https://flagcdn.com/w320/pk.png" alt="Pakistan Flag">
+            <div class="team-name">Pakistan</div>
+          </div>
+        </div>
+        <div class="details">ODI Series Match 3</div>
+      </div>
+  </div>
+
+  <!-- Bottom Section -->
+  <div class="bottom-section">
+    <strong>Stay Updated!</strong><br>
+    Get real-time predictions, player stats, and insights for all upcoming matches. 
+  </div>
+
+  <!-- Footer Section -->
+  <div class="footer">
+    © 2024 Fantasy Cricket. All rights reserved.
+  </div>
+</body>
+</html>
