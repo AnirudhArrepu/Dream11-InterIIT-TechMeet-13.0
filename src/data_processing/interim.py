@@ -487,14 +487,23 @@ for filename in os.listdir(directory):
                 for player in fantasy_points_result:
                     player_6s.append(players_stats[player]["6"])
 
-                df_fantasy_points["Economy"] = economy_rate
-                df_fantasy_points["Strike Rate"] = strike_rates
+                player_opponent_team_names = []
+                for player in fantasy_points_result:
+                    player_team = players_stats[player]["team_name"]
+                    team_names = data["info"]["teams"]["teams"]
+                    for team_name in team_names:
+                        if(player_team != team_name):
+                            player_opponent_team_names.append(team_name)
+                    
 
-                df_fantasy_points["4s"] = player_4s
-                df_fantasy_points["6s"] = player_6s
-                
+                # df_fantasy_points["Economy"] = economy_rate
+                # df_fantasy_points["Strike Rate"] = strike_rates
 
+                # df_fantasy_points["4s"] = player_4s
+                # df_fantasy_points["6s"] = player_6s
+        
                 df_fantasy_points["Team"] = team_names
+                df_fantasy_points["Opponent"] = player_opponent_team_names
 
                 df_fantasy_points["City"] = match_city
                 df_fantasy_points["Match Type"] = data["info"]["match_type"].lower()
