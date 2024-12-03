@@ -133,7 +133,9 @@ def getMatchData(param):
 
                 # Extract required details
                 team1_name = match_info["team1"]["teamSName"]
+                team1_id = match_info["team1"]["teamId"]
                 team2_name = match_info["team2"]["teamSName"]
+                team2_id = match_info["team2"]["teamId"]
                 match_format = match_info["matchFormat"]
                 start_date = match_info["startDate"]
                 stadium = match_info["venueInfo"]["ground"]
@@ -155,7 +157,9 @@ def getMatchData(param):
 
                 match = {
                     "team1": team1_name,
+                    "team1id": team1_id,
                     "team2": team2_name,
+                    "team2id": team2_id,
                     "matchFormat": match_format,
                     "date": formatted_date,
                     "time": formatted_time,
