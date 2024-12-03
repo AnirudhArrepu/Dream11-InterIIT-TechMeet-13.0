@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import requests
 from datetime import datetime, timezone
@@ -85,7 +85,7 @@ def get_cricket_news():
 
 @app.route('/api/cricket-news/<id>', methods=['GET'])
 @cache.cached()
-def getURL(id):
+def getNewsURL(id):
     url = f"https://cricbuzz-cricket.p.rapidapi.com/news/v1/detail/{id}"
 
     headers = {
@@ -105,6 +105,129 @@ def getURL(id):
         print(url)
         return jsonify({"url": url})
 
+
+@app.route('/api/cricket-matches/<param>', methods=['POST'])
+def getMatchData(param):
+    url = f"https://cricbuzz-cricket.p.rapidapi.com/matches/v1/{param}"
+
+    headers = {
+        "x-rapidapi-key": "d2a20b6689msh6f097e931c446a4p145a20jsn3807682cca7d",
+        "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers)
+    data = response.json()
+
+    matches = []
+
+    for type_match in data["typeMatches"]:
+        matchType = type_match["matchType"]
+        if matchType=="Women" or matchType=="Domestic":
+            continue
+        # if matchType != "International":
+        #     continue
+        for series_match in type_match["seriesMatches"]:
+            series_info = series_match.get("seriesAdWrapper", {})
+            for match in series_info.get("matches", []):
+                match_info = match["matchInfo"]
+
+                # Extract required details
+                team1_name = match_info["team1"]["teamSName"]
+                team1_id = match_info["team1"]["teamId"]
+                team2_name = match_info["team2"]["teamSName"]
+                team2_id = match_info["team2"]["teamId"]
+                match_format = match_info["matchFormat"]
+                start_date = match_info["startDate"]
+                stadium = match_info["venueInfo"]["ground"]
+                status = match_info["status"]
+                state = match_info["state"]
+                match_title = match_info["matchDesc"] + " of " + match_info["seriesName"]
+
+                # Convert startDate from timestamp to readable format
+                if isinstance(start_date, str):
+                    start_date = int(start_date)
+
+                if start_date:
+                    dt = datetime.fromtimestamp(start_date / 1000, tz=timezone.utc)
+                    formatted_date = dt.strftime('%Y-%m-%d')
+                    formatted_time = dt.strftime('%H:%M:%S')
+                else:
+                    formatted_date = None
+                    formatted_time = None
+
+                match = {
+                    "team1": team1_name,
+                    "team1id": team1_id,
+                    "team2": team2_name,
+                    "team2id": team2_id,
+                    "matchFormat": match_format,
+                    "date": formatted_date,
+                    "time": formatted_time,
+                    "stadium": stadium,
+                    "status": status,
+                    "state": state,
+                    "matchTitle": match_title
+                }
+                matches.append(match)
+
+    return jsonify({"matches": matches})
+
+
+@app.route('/app/players/perteam/<teamid>', methods=['GET'])
+def get_players(teamid):
+    url = "https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/35878/team/9"
+
+    headers = {
+        "x-rapidapi-key": "d2a20b6689msh6f097e931c446a4p145a20jsn3807682cca7d",
+        "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers)
+    data = response.json()
+
+    players = []
+
+    plers = data["players"]
+
+    for player in plers["playing XI"]:
+        dt = {"name" : player["name"], "role": player["role"]}
+        players.append(dt)
+    
+    for player in plers["bench"]:
+        dt = {"name" : player["name"], "role": player["role"]}
+        players.append(dt)
+
+    return jsonify({"players + roles: ", players})
+
+
+@app.route('/app/players/role/<playerid>', methods=['GET'])
+def getPlayerData():
+    url = "https://cricbuzz-cricket.p.rapidapi.com/stats/v1/player/6635"
+
+    headers = {
+        "x-rapidapi-key": "d2a20b6689msh6f097e931c446a4p145a20jsn3807682cca7d",
+        "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers)
+
+    data = response.json()
+    role = data["role"]
+
+    return jsonify({"role: ", role})
+
+@app.route('/app/model/predict', methods=['POST'])
+def get_prediction():
+    data = request.get_json()
+
+    player_names = data['player_names']
+
+    predictions = [getFantasyPoints(name) for name in player_names]
+
+    return jsonify({"predictions": predictions}), 200
+
+def getFantasyPoints():
+    pass
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
