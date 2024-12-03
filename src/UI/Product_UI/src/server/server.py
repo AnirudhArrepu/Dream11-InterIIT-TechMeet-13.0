@@ -85,7 +85,7 @@ def get_cricket_news():
 
 @app.route('/api/cricket-news/<id>', methods=['GET'])
 @cache.cached()
-def getURL(id):
+def getNewsURL(id):
     url = f"https://cricbuzz-cricket.p.rapidapi.com/news/v1/detail/{id}"
 
     headers = {
@@ -104,6 +104,45 @@ def getURL(id):
         url = urlWrapper.get("webURL", "https://cricbuzz.com")
         print(url)
         return jsonify({"url": url})
+
+
+@app.route('/api/cricket-matches/recent', method=['POST'])
+def getMatchDataRecent():
+    url = "https://cricbuzz-cricket.p.rapidapi.com/matches/v1/recent"
+
+    headers = {
+        "x-rapidapi-key": "d2a20b6689msh6f097e931c446a4p145a20jsn3807682cca7d",
+        "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers)
+    data = response.json()
+
+    matches = []
+
+    for typematches in data["typeMatches"]:
+        matchType = typematches["matchType"]
+        for seriesmatch in matchType[seriesmatch]:
+            for match in seriesmatch["matches"]:
+                team1Name = match["team1"]
+                team2Name = match["team2"]
+                matchformat = match["matchFormat"]
+                date = match["startDate"]
+                stadium = match["venueInfo"]["ground"]
+                status = match["status"]
+                matchTitle = match["matchDesc"] + " of " + match["seriesName"]
+                match = {
+                    "team1": team1Name,
+                    "team2": team2Name,
+                    "matchFormat": matchformat,
+                    "date": date,
+                    "stadium": stadium,
+                    "status": status,
+                    "matchTitle": matchTitle
+                }
+                matches.append(match)
+    
+    return jsonify({"matches: ", matches})
 
 
 if __name__ == '__main__':
