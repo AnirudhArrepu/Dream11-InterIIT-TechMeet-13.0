@@ -62,7 +62,7 @@ local_filename = "names.csv"
 df = pd.read_csv(local_filename, header=None, names=["ID", "Name"])
 
 combined_df_path = "../data/raw/cricksheet/final/combined_output.csv"
-df_combined = pd.read_csv(combined_df_path, header =None, names=['Player','Fantasy Points','Player Code','Match Date','Economy','Strike Rate','4s','6s','Team','City','Match Type'])
+df_combined = pd.read_csv(combined_df_path, header =None, names=['Player','Fantasy Points','Player Code', 'Match Date','Team','Opponent','City','Match Type'])
 
 # Process all unique names in the Player column
 unique_players = df_combined["Player"].unique()
