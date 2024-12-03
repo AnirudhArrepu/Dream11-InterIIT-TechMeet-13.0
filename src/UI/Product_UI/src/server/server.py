@@ -173,8 +173,8 @@ def getMatchData(param):
     return jsonify({"matches": matches})
 
 
-@app.route('/app/players/permatch/<matchid>', methods=['GET'])
-def get_players(matchid):
+@app.route('/app/players/perteam/<teamid>', methods=['GET'])
+def get_players(teamid):
     url = "https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/35878/team/9"
 
     headers = {
