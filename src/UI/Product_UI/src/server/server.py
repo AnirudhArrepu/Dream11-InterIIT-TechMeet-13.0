@@ -173,9 +173,9 @@ def getMatchData(param):
     return jsonify({"matches": matches})
 
 
-@app.route('/app/players/perteam/<teamid>', methods=['GET'])
+@app.route('/api/players/perteam/<teamid>', methods=['GET'])
 def get_players(teamid):
-    url = "https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/35878/team/9"
+    url = f"https://cricbuzz-cricket.p.rapidapi.com/teams/v1/{teamid}/players"
 
     headers = {
         "x-rapidapi-key": "d2a20b6689msh6f097e931c446a4p145a20jsn3807682cca7d",
@@ -197,7 +197,7 @@ def get_players(teamid):
         dt = {"name" : player["name"], "role": player["role"]}
         players.append(dt)
 
-    return jsonify({"players + roles: ", players})
+    return jsonify({"players": players})
 
 
 @app.route('/app/players/role/<playerid>', methods=['GET'])
