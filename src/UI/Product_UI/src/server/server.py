@@ -106,7 +106,7 @@ def getNewsURL(id):
         return jsonify({"url": url})
 
 
-@app.route('/api/cricket-matches/<param>', method=['POST'])
+@app.route('/api/cricket-matches/<param>', methods=['POST'])
 def getMatchData(param):
     url = f"https://cricbuzz-cricket.p.rapidapi.com/matches/v1/{param}"
 
@@ -120,45 +120,53 @@ def getMatchData(param):
 
     matches = []
 
-    for typematches in data["typeMatches"]:
-        matchType = typematches["matchType"]
-        for seriesmatch in matchType[seriesmatch]:
-            for match in seriesmatch["matches"]:
-                team1Name = match["team1"]
-                team2Name = match["team2"]
-                matchformat = match["matchFormat"]
-                date = match["startDate"]
-                stadium = match["venueInfo"]["ground"]
-                status = match["status"]
-                state = match["state"]
-                matchTitle = match["matchDesc"] + " of " + match["seriesName"]
+    for type_match in data["typeMatches"]:
+        matchType = type_match["matchType"]
+        if matchType=="Women" or matchType=="Domestic":
+            continue
+        # if matchType != "International":
+        #     continue
+        for series_match in type_match["seriesMatches"]:
+            series_info = series_match.get("seriesAdWrapper", {})
+            for match in series_info.get("matches", []):
+                match_info = match["matchInfo"]
 
-                if isinstance(date, str):
-                    date = int(date)
+                # Extract required details
+                team1_name = match_info["team1"]["teamSName"]
+                team2_name = match_info["team2"]["teamSName"]
+                match_format = match_info["matchFormat"]
+                start_date = match_info["startDate"]
+                stadium = match_info["venueInfo"]["ground"]
+                status = match_info["status"]
+                state = match_info["state"]
+                match_title = match_info["matchDesc"] + " of " + match_info["seriesName"]
 
-                # Convert publish time from timestamp to a readable format (UTC)
-                if date:
-                    dt = datetime.fromtimestamp(date / 1000, tz=timezone.utc)
+                # Convert startDate from timestamp to readable format
+                if isinstance(start_date, str):
+                    start_date = int(start_date)
+
+                if start_date:
+                    dt = datetime.fromtimestamp(start_date / 1000, tz=timezone.utc)
                     formatted_date = dt.strftime('%Y-%m-%d')
                     formatted_time = dt.strftime('%H:%M:%S')
-                
+                else:
+                    formatted_date = None
+                    formatted_time = None
+
                 match = {
-                    "team1": team1Name,
-                    "team2": team2Name,
-                    "matchFormat": matchformat,
+                    "team1": team1_name,
+                    "team2": team2_name,
+                    "matchFormat": match_format,
                     "date": formatted_date,
                     "time": formatted_time,
                     "stadium": stadium,
                     "status": status,
                     "state": state,
-                    "matchTitle": matchTitle
+                    "matchTitle": match_title
                 }
                 matches.append(match)
-    
-    return jsonify({"matches: ", matches})
 
-
-
+    return jsonify({"matches": matches})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
