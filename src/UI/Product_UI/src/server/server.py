@@ -2,9 +2,15 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 import requests
 from datetime import datetime, timezone
+from flask_caching import Cache
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+
+# Configure Flask-Caching
+app.config['CACHE_TYPE'] = 'SimpleCache'  # For production, use 'RedisCache' or 'FileSystemCache'
+app.config['CACHE_DEFAULT_TIMEOUT'] = 300  # Cache timeout in seconds
+cache = Cache(app)
 
 # # RapidAPI credentials
 # RAPIDAPI_KEY = "10c8c27a68msh957ab42b76eab8cp13a77cjsn68a6f784d660"
@@ -44,6 +50,9 @@ def get_cricket_news():
                 cover_image = story.get("coverImage", {})
                 caption = cover_image.get("caption", "No caption")
                 image_source = cover_image.get("source", "No image source")
+                id = story.get("id", "")
+
+                # url = getURL(id)
                 
                 # Convert pub_time to an integer if it's a string
                 if isinstance(pub_time, str):
@@ -61,6 +70,7 @@ def get_cricket_news():
                     "source": source,
                     "caption": caption,
                     "image_source": image_source,
+                    "id": id,
                 })
 
         # Return the formatted news stories as JSON
@@ -72,6 +82,28 @@ def get_cricket_news():
     except requests.exceptions.RequestException as e:
         print(f"Error: {e}")
         return jsonify({"message": "Error fetching data from the RapidAPI"}), 500
+
+@app.route('/api/cricket-news/<id>', methods=['GET'])
+@cache.cached()
+def getURL(id):
+    url = f"https://cricbuzz-cricket.p.rapidapi.com/news/v1/detail/{id}"
+
+    headers = {
+	    "x-rapidapi-key": "10c8c27a68msh957ab42b76eab8cp13a77cjsn68a6f784d660",
+	    "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers)
+
+    data = response.json()
+    urlWrapper = data.get("appIndex", "NotFound")
+
+    if urlWrapper == "NotFound":
+        return jsonify({"url": "https://cricbuzz.com"})
+    else:
+        url = urlWrapper.get("webURL", "https://cricbuzz.com")
+        print(url)
+        return jsonify({"url": url})
 
 
 if __name__ == '__main__':
