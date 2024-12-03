@@ -106,9 +106,9 @@ def getNewsURL(id):
         return jsonify({"url": url})
 
 
-@app.route('/api/cricket-matches/recent', method=['POST'])
-def getMatchDataRecent():
-    url = "https://cricbuzz-cricket.p.rapidapi.com/matches/v1/recent"
+@app.route('/api/cricket-matches/<param>', method=['POST'])
+def getMatchData(param):
+    url = f"https://cricbuzz-cricket.p.rapidapi.com/matches/v1/{param}"
 
     headers = {
         "x-rapidapi-key": "d2a20b6689msh6f097e931c446a4p145a20jsn3807682cca7d",
@@ -143,6 +143,8 @@ def getMatchDataRecent():
                 matches.append(match)
     
     return jsonify({"matches: ", matches})
+
+
 
 
 if __name__ == '__main__':
