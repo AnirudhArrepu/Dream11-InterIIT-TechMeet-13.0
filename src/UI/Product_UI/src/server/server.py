@@ -130,6 +130,7 @@ def getMatchData(param):
                 date = match["startDate"]
                 stadium = match["venueInfo"]["ground"]
                 status = match["status"]
+                state = match["state"]
                 matchTitle = match["matchDesc"] + " of " + match["seriesName"]
                 match = {
                     "team1": team1Name,
@@ -138,6 +139,7 @@ def getMatchData(param):
                     "date": date,
                     "stadium": stadium,
                     "status": status,
+                    "state": state,
                     "matchTitle": matchTitle
                 }
                 matches.append(match)
