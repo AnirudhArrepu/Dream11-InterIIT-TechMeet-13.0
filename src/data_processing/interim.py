@@ -60,11 +60,11 @@ for filename in os.listdir(directory):
                         }
 
                 player_list = data["info"]["players"]
-                print(player_list)
+                # print(player_list)
                 for team in player_list:
-                    print(team)
+                    # print(team)
                     for player in player_list[team]:
-                        print(player)
+                        # print(player)
                         initialize_player(player, team, False)
 
                 # Parse innings
@@ -490,9 +490,10 @@ for filename in os.listdir(directory):
                 player_opponent_team_names = []
                 for player in fantasy_points_result:
                     player_team = players_stats[player]["team_name"]
-                    team_names = data["info"]["teams"]
-                    for team_name in team_names:
+                    team_na = data["info"]["teams"]
+                    for team_name in team_na:
                         if(player_team != team_name):
+                            print(team_name)
                             player_opponent_team_names.append(team_name)
                     
 
@@ -505,7 +506,7 @@ for filename in os.listdir(directory):
                 df_fantasy_points["Team"] = team_names
                 df_fantasy_points["Opponent"] = player_opponent_team_names
 
-                df_fantasy_points["City"] = match_city
+                # df_fantasy_points["City"] = match_city
                 df_fantasy_points["Match Type"] = data["info"]["match_type"].lower()
                 # Display the DataFrame
                 print(df_fantasy_points)
