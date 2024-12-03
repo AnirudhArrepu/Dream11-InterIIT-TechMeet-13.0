@@ -168,5 +168,50 @@ def getMatchData(param):
 
     return jsonify({"matches": matches})
 
+
+@app.route('/app/players/permatch/<matchid>', methods=['GET'])
+def get_players(matchid):
+    url = "https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/35878/team/9"
+
+    headers = {
+        "x-rapidapi-key": "d2a20b6689msh6f097e931c446a4p145a20jsn3807682cca7d",
+        "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers)
+    data = response.json()
+
+    players = []
+
+    plers = data["players"]
+
+    for player in plers["playing XI"]:
+        dt = {"name" : player["name"], "role": player["role"]}
+        players.append(dt)
+    
+    for player in plers["bench"]:
+        dt = {"name" : player["name"], "role": player["role"]}
+        players.append(dt)
+
+    return jsonify({"players + roles: ", players})
+
+
+@app.route('/app/players/role/<playerid>', methods=['GET'])
+def getPlayerData():
+    url = "https://cricbuzz-cricket.p.rapidapi.com/stats/v1/player/6635"
+
+    headers = {
+        "x-rapidapi-key": "d2a20b6689msh6f097e931c446a4p145a20jsn3807682cca7d",
+        "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers)
+
+    data = response.json()
+    role = data["role"]
+
+    return jsonify({"role: ", role})
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
