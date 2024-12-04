@@ -2,12 +2,34 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import MatchCard from "./MatchCard";
 import NewsSection from "./NewsSection";
+import PopCard from "./PopCard";
 
 const MatchList = () => {
   const [selectedTab, setSelectedTab] = useState("upcoming");
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false); // Modal visibility state
+  const [selectedMatch, setSelectedMatch] = useState(null); // Selected match for the modal
+  const [team1, setTeam1] = useState(null);
+  const [team2, setTeam2] = useState(null);
+
+  // Handle match card click
+  const handleMatchClick = async (match) => {
+    setSelectedMatch(match);
+    console.log(match)
+    const response1 = await axios.get(`http://localhost:5000/api/players/perteam/${match["team1id"]}`);
+    setTeam1(response1.data.players || null);
+    const response2 = await axios.get(`http://localhost:5000/api/players/perteam/${match["team2id"]}`);
+    setTeam2(response2.data.players || null);
+    setShowModal(true);
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedMatch(null);
+  };
 
   const fetchMatches = async (param) => {
     setLoading(true);
@@ -70,7 +92,9 @@ const MatchList = () => {
             {!loading && !error && matches.length > 0 ? (
               <div className="max-h-screen overflow-y-auto">
                 {matches.map((match, index) => (
-                  <MatchCard key={index} match={match} />
+                  <div key={index} onClick={() => handleMatchClick(match)}>
+                    <MatchCard match={match} />
+                  </div>
                 ))}
               </div>
             ) : (
@@ -93,6 +117,11 @@ const MatchList = () => {
             <NewsSection />
           </div>
         </div>
+
+        {/* Modal */}
+      {showModal && (
+        <PopCard match={selectedMatch} team1={team1} team2={team2} onClose={closeModal} />
+      )}
       </div>
     </div>
   );
