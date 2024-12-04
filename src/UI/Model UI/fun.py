@@ -130,7 +130,7 @@ def savePredictionsMAE():
 
         
 #choose start date and end date for train data
-getTrainData('2023-12-14', '2023-12-15')
+getTrainingData('2023-12-14', '2023-12-15')
 #then train the model
 model_train('./data/train.csv')
 
