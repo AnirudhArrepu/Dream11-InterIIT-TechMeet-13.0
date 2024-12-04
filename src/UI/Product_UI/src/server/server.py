@@ -5,6 +5,14 @@ from datetime import datetime, timezone, timedelta
 from flask_caching import Cache
 import jwt
 from functools import wraps
+from pymongo import MongoClient
+from werkzeug.security import check_password_hash, generate_password_hash
+
+
+MONGO_URI = "mongodb+srv://shankhesh01:qRxyuHlQGRL0BrpA@team97sudo.fkb7v.mongodb.net/?retryWrites=true&w=majority&appName=Team97sudo"
+client = MongoClient(MONGO_URI)
+db = client["team97db"]  # Replace with your database name
+users_collection = db["Users"]  # Replace with your collection name
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -228,44 +236,45 @@ def get_players(teamid):
 
 @app.route('/login', methods=['POST'])
 def login_page():
-    if request.method == 'POST':
-        data = request.get_json()
-        username = data.get("username")
-        password = data.get("password")
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
 
-        # Validate username and password
-        if username in users and users[username] == password:
-            session['logged_in'] = True
-            session['username'] = username  # Store username in session
+    # Retrieve the user from the database
+    user = users_collection.find_one({"username": username})
 
-            # Generate JWT token
-            token = jwt.encode({
-                'user': username,
-                'exp': datetime.utcnow() + timedelta(seconds=60)
-            }, app.config['SECRET_KEY'], algorithm="HS256")
+    if user and check_password_hash(user['password'], password):
+        # Generate JWT token
+        token = jwt.encode({
+            'user': username,
+            'exp': datetime.utcnow() + timedelta(seconds=3600)  # 1 hour expiration
+        }, app.config['SECRET_KEY'], algorithm="HS256")
 
-            return jsonify({'token': token, 'message': 'Login successful!'}), 200
-        else:
-            return jsonify({'message': 'Invalid username or password!'}), 401
+        return jsonify({'token': token, 'message': 'Login successful!'}), 200
+    else:
+        return jsonify({'message': 'Invalid username or password!'}), 401
 
 
 
-@app.route('/SignUp', methods=['POST','GET'])
+@app.route('/SignUp', methods=['POST'])
 def signup():
-    data = request.get_json()  # Parse JSON data from the request
+    data = request.get_json()
     username = data.get('username')
     password = data.get('password')
-    
-    # Ensure username and password are provided
+
     if not username or not password:
         return jsonify({'message': 'Username and password are required!'}), 400
-    
-    # Ensure username is unique
-    if username in users:
+
+    # Check if username already exists in the database
+    if users_collection.find_one({"username": username}):
         return jsonify({'message': 'Username already exists! Please choose a different one.'}), 409
-    
-    # Register the user
-    users[username] = password
+
+    # Hash the password before storing it
+    hashed_password = generate_password_hash(password, method='sha256')
+
+    # Insert the new user into the database
+    users_collection.insert_one({"username": username, "password": hashed_password})
+
     return jsonify({'message': 'Signup successful! Please log in.'}), 201
 
 @app.route('/logout')
