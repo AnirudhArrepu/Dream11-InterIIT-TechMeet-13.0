@@ -116,8 +116,10 @@ def getGroundTruthBest11(players):
 
 
 def savePredictionsMAE():
+    maes = []
+    mapes = []
+    
     with open('modelInput.json', 'r') as jsoninput:
-        maes = []
         data = json.load(jsoninput)
         
         for match in data.values():
@@ -130,6 +132,7 @@ def savePredictionsMAE():
 
             # Extract points from dream_team (always 11 players)
             points_list = [player['points'] for player in dream_team]
+            actual_points_list = [player['points'] for player in ground_team]
 
             # Calculate the dream team points with the specified weighting
             if len(points_list) == 11:
@@ -144,13 +147,25 @@ def savePredictionsMAE():
                 dream_team_points = sum(points_list)
 
             # Calculate ground team points (assuming top 11 players from ground truth)
-            ground_team_points = sum(player['points'] for player in ground_team)
+            ground_team_points = sum(actual_points_list)
 
             # Calculate MAE (Mean Absolute Error)
             mae = abs(dream_team_points - ground_team_points)
             maes.append(mae)
 
-        return maes
+            # Calculate MAPE (Mean Absolute Percentage Error)
+            if ground_team_points != 0:  # Prevent division by zero
+                mape = (abs(dream_team_points - ground_team_points) / ground_team_points) * 100
+                mapes.append(mape)
+
+        # Calculate averages for MAE and MAPE
+        avg_mae = sum(maes) / len(maes) if maes else 0
+        avg_mape = sum(mapes) / len(mapes) if mapes else 0
+
+        return avg_mae, avg_mape
+
+
+
 
 
 
