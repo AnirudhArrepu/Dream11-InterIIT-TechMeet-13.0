@@ -8,7 +8,7 @@ def getFinalName(name, df, df_combined) -> str:
     matched_rows = df[df['ID'] == id].copy()
 
     if matched_rows.empty:
-        return ""
+        return name
 
     # Step 1: Combine single-letter words in each name
     matched_rows['Name'] = matched_rows['Name'].apply(
