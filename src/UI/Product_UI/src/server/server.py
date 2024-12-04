@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import requests
 from datetime import datetime, timezone
@@ -216,6 +216,18 @@ def getPlayerData():
 
     return jsonify({"role: ", role})
 
+@app.route('/app/model/predict', methods=['POST'])
+def get_prediction():
+    data = request.get_json()
+
+    player_names = data['player_names']
+
+    predictions = [getFantasyPoints(name) for name in player_names]
+
+    return jsonify({"predictions": predictions}), 200
+
+def getFantasyPoints():
+    pass
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
