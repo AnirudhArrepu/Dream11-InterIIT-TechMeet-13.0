@@ -21,10 +21,13 @@ const MatchCard = ({ match }) => {
       <div className="flex justify-between items-center px-4 py-6">
         {/* Team 1 */}
         <div className="flex flex-col items-center">
-          <img 
-            src={`https://static.cricbuzz.com/a/img/v1/72x54/i1/c${match.team1id}/team_flag.jpg`} 
-            alt="Team Flag" 
-          />
+          <div>
+            <img 
+              src={`https://static.cricbuzz.com/a/img/v1/72x54/i1/c${match.team1id}/team_flag.jpg`} 
+              alt="Team Flag"
+              className="h-8 rounded-lg"  
+            />
+          </div>
           <span className="text-lg font-bold text-gray-800">
             {match.team1}
           </span>
@@ -33,10 +36,13 @@ const MatchCard = ({ match }) => {
         <span className="text-xl font-extrabold text-red-600">vs</span>
         {/* Team 2 */}
         <div className="flex flex-col items-center">
-          <img 
-            src={`https://static.cricbuzz.com/a/img/v1/72x54/i1/c${match.team2id}/team_flag.jpg`} 
-            alt="Team Flag" 
-          />
+          <div className="teamIcon">
+            <img 
+              src={`https://static.cricbuzz.com/a/img/v1/72x54/i1/c${match.team2id}/team_flag.jpg`} 
+              alt="Team Flag"
+              className="h-8 rounded-lg"  
+            />
+          </div>
           <span className="text-lg font-bold text-gray-800">
             {match.team2}
           </span>

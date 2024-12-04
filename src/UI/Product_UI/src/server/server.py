@@ -30,6 +30,7 @@ RAPIDAPI_HOST = "cricbuzz-cricket.p.rapidapi.com"
 @app.route('/api/cricket-news', methods=['POST'])
 @cache.cached(timeout=1800)
 def get_cricket_news():
+    print("getting news")
     try:
         # Making the request to the RapidAPI cricket news endpoint
         url = "https://cricbuzz-cricket.p.rapidapi.com/news/v1/index"
