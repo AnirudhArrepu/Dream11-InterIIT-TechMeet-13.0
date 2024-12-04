@@ -7,65 +7,39 @@ from predict_model import predict_model
 def getTrainingData(startDate, endDate):
     with open('../../data/raw/cricksheet/final/combined_output.csv', 'r') as file:
         df = pd.read_csv(file)
+        print(df.head())  # Add this line to check the structure of the data
         df['Match Date'] = pd.to_datetime(df['Match Date'])
-
         filtered_df = df[(df['Match Date'] >= startDate) & (df['Match Date'] <= endDate)]
-        
-        # filtered_df = filtered_df.sort_values(by="Match Date")
-
         filtered_df.to_csv('./data/train.csv', index=False)
-
-        # print(filtered_df.head())
 
 def getTestData(startDate, endDate):
     with open('../../data/raw/cricksheet/final/combined_output.csv', 'r') as file:
         df = pd.read_csv(file)
         df['Match Date'] = pd.to_datetime(df['Match Date'])
-
-        filtered_df = df[(df['Match Date'] >= startDate) & (df['Match Date'] <= endDate)]
         
         match_dict = {}
 
-        format_match = {
-            "date": "",
-            "matchFormat": "",
-            "team1":{
-                "name": "",
-                "players": [
-
-                ]
-            },
-            "team2":{
-                "name": "",
-                "players": [
-                    
-                ]
-            }
-        }
-
-        for _, row in filtered_df.iterrows():
+        for _, row in df.iterrows():
             teams = sorted([row["Team"], row["Opponent"]])
             match_key = f"{row['Match Date']}|{teams[0]}|{teams[1]}"
             
             if match_key not in match_dict:
                 match_dict[match_key] = {
-                "date": row['Match Date'].strftime('%Y-%m-%d'),
-                "matchFormat": row['Match Type'],
-                "team1": {"name": teams[0], "players": []},
-                "team2": {"name": teams[1], "players": []},
-}
+                    "date": row['Match Date'].strftime('%Y-%m-%d'),
+                    "matchFormat": row['Match Type'],
+                    "team1": {"name": teams[0], "players": []},
+                    "team2": {"name": teams[1], "players": []},
+                }
             
             if(row["Team"] == teams[0]):
                 match_dict[match_key]["team1"]["players"].append({"name": row["Player"]})
             else:
                 match_dict[match_key]["team2"]["players"].append({"name": row["Player"]})
 
-
-        # for match, players in match_dict.items():
-        #     print(f"Match: {match}, Players: {players}")
-
+        print(match_dict)  # Debug output
         with open("modelInput.json", "w") as outfile: 
             json.dump(match_dict, outfile)
+
 
 def getGroundTruth(players):
     with open('../../data/raw/cricksheet/final/combined_output.csv', 'r') as file:
@@ -201,13 +175,9 @@ def savePredictionsMAE():
         return avg_mae, avg_mape
 
 
-
-
-
-
         
 #choose start date and end date for train data
-# getTrainingData('2010-12-14', '2024-1-15')
+getTrainingData('2010-12-14', '2024-1-15')
 # #then train the model
 # model_train('./data/train.csv')
 
