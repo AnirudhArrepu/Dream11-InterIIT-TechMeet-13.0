@@ -19,8 +19,10 @@ const Footer = () => {
                 <a href="https://www.dream11.com/download-app" className="block hover:text-gray-400">Fantasy Cricket App Download</a>
               </div>
               <div className="space-y-2">
-              <Link to="/AboutUs" className="block hover:text-gray-400">About Us</Link>
-              <Link to="/ContactUs" className="block hover:text-gray-400">Support</Link>
+              <Link to="/about" className="block hover:text-gray-400">About Us</Link>
+              <Link to="/support" className="block hover:text-gray-400">Support</Link>
+              <p>© 2024 Fantasy Cricket Predictor. All rights reserved.</p>
+              <p>Designed for Inter IIT Tech Meet | Powered by AI and Passion for Cricket</p>
               </div>
             </div>
           </div>

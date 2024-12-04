@@ -18,6 +18,7 @@ const Header = () => {
           <Link to="/matches" className="hover:text-gray-400">Matches</Link>
           <Link to="/about" className="hover:text-gray-400">About Us</Link>
           <Link to="/support" className="hover:text-gray-400">Support</Link>
+          <Link to="/login" className="hover:text-gray-400">Log In</Link>
         </nav>
 
         {/* Hamburger Menu for mobile */}

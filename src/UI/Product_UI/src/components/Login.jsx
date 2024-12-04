@@ -25,7 +25,7 @@ const Login = () => {
                 localStorage.setItem("token", data.token);
 
                 // Navigate to the dashboard or homepage after successful login
-                navigate("/matches");
+                navigate("/dashboard");
             } else {
                 alert(data.message || "Login failed!");
             }
@@ -77,7 +77,7 @@ const Login = () => {
                 </form>
                 <p className="mt-4 text-sm text-center">
                     Don't have an account?{" "}
-                    <Link to="/SignUp" className="text-indigo-600 hover:underline">
+                    <Link to="/signUp" className="text-indigo-600 hover:underline">
                         Sign up here
                     </Link>
                 </p>
