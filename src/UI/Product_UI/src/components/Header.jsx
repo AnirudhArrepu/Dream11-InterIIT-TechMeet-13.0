@@ -7,9 +7,13 @@ const Header = () => {
   return (
     <header className="bg-gradient-to-r from-red-500 to-red-700 text-white">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-4">
-        {/* Logo */}
-        <Link to="/" className="text-xl font-bold hover:text-gray-300">
-          Dream11
+        <Link to="/" className="flex items-center space-x-2 text-xl font-bold hover:text-gray-300">
+          <img
+            src="\logo.png"
+            alt="Wicket Wizard Logo"
+            className="h-8 w-8 object-cover"
+          />
+          <span>Wicket Wizard</span>
         </Link>
 
         {/* Menu for larger screens */}
