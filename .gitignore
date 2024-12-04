@@ -5,3 +5,4 @@ train_model.ipynb
 training_log.log
 test.ipynb
 players_list.csv
+package-lock.json
