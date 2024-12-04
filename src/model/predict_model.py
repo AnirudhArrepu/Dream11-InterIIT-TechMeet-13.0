@@ -26,6 +26,7 @@ client = Mistral(api_key="r2OC0XPdCa4VSwkarNCP53PVdlWStSJ1")
 loaded_model = joblib.load('xgb_model_best.pkl')
 player_encoding, team_encoding, match_date_encoding, opponent_encoding, match_type_encoding = joblib.load('encodings.pkl')
 
+
 def apply_encoding(df, encoding_dict, column_name, global_mean):
     return df[column_name].map(encoding_dict).fillna(global_mean)
 
@@ -35,7 +36,7 @@ json_data = {
   "team1": {
     "name": "India",
     "players": [
-        {"name": "KL Rahul", "role": "Batsman"},
+        {"name": "Arshdeep Singh", "role": "Batsman"},
         {"name": "Virat Kohli", "role": "Batsman"},
         {"name": "Rohit Sharma", "role": "Batsman"},
         {"name": "Surya Yadav", "role": "Batsman"},
@@ -114,61 +115,27 @@ X = X.iloc[:, :-1]
 all_teams = set(X['Team'].unique())
 all_teams = list(all_teams)
 
-# print(all_teams)
-# print(X_original)
-# print(X)
-# print("\nPlayer-Role Mapping:")
-# print(player_role_mapping)
-
-# global_mean_player = player_encoding.mean()
-# global_mean_team = team_encoding.mean()
-# global_mean_match_date = match_date_encoding.mean()
-# global_mean_opponent = opponent_encoding.mean()
-# global_mean_match_type = match_type_encoding.mean()
-
 global_mean_player = np.mean(list(player_encoding.values()))
 global_mean_team = np.mean(list(team_encoding.values()))
 global_mean_match_date = np.mean(list(match_date_encoding.values()))
 global_mean_opponent = np.mean(list(opponent_encoding.values()))
 global_mean_match_type = np.mean(list(match_type_encoding.values()))
 
-
-# print(global_mean_team, global_mean_player, global_mean_match_date, global_mean_opponent, global_mean_match_type)
-# print(player_encoding)
-
-
 X['Player'] = apply_encoding(X, player_encoding, 'Player', global_mean_player)
 X['Team'] = apply_encoding(X, team_encoding, 'Team', global_mean_team)
 X['Match Date'] = apply_encoding(X, match_date_encoding, 'Match Date', global_mean_match_date)
 X['Opponent'] = apply_encoding(X, opponent_encoding, 'Opponent', global_mean_opponent)
 X['Match Type'] = apply_encoding(X, match_type_encoding, 'Match Type', global_mean_match_type)
-
-# print("+++++++")
-# print(team_encoding)
-# print("+++++++")
-# print(opponent_encoding)
-# print("+++++++")
-
-# print(X)
 X = X.values
-#  print(X)
-# print(X['Team'])
 
 predictions = loaded_model.predict(X)
-
-
 chosen_players = []
-
 roles = {
     "Batsman": {},
     "Bowler": {},
     "All-Rounder": {},
     "Wicket-Keeper": {}
 }
-
-# print("---------------")
-# print(predictions)
-# print("---------------")
 
 team_A_players = set()
 team_B_players = set()
@@ -178,16 +145,10 @@ for i, player_name in enumerate(player_role_mapping):
     prediction_score = predictions[i]
     team = X_original.loc[X_original['Player'] == player_name, 'Team'].values[0]
     roles[role][player_name] = prediction_score
-    # print(team)
     if team == all_teams[0]:
         team_A_players.add(player_name)
-        # print(player_name)
     else:
         team_B_players.add(player_name)
-        # print(player_name)
-
-# print(team_A_players)
-# print(team_B_players)
 
 selected_roles = set()  
 selected_teams = set()  
@@ -225,26 +186,12 @@ for player, score in remaining_players:
     if len(chosen_players) < 11:
         chosen_players.append((player, score))
 
-
-
-# print("Chosen Players: ")
-# for player, points in chosen_players:
-#     print(f"{player}: {points} points")
-
 chosen_player_names = [player[0] for player in chosen_players]
 chosen_players_scores = [player[1] for player in chosen_players]
 chosen_players_encoded = X[X_original['Player'].isin(chosen_player_names)]
 feature_names = [ 'Player' , 'Match Date', 'Team', 'Opponent', 'Match Type']
-
-# print(chosen_player_names)
-# print(chosen_players_scores)
-
-
-#total score
 total_score = sum(chosen_players_scores)
-# print("----------------")
-# print(total_score)
-# print("----------------")
+
 
 explainer = LimeTabularExplainer(
     training_data=X,         # The model was trained on this data (X with encodings)
@@ -257,14 +204,9 @@ explainer = LimeTabularExplainer(
 
 all_explanations = []
 for i, player_data_values in enumerate(chosen_players_encoded):
-    player_name = chosen_player_names[i]  # Assuming you have the player names list
-
-    # Get the prediction for this player (using existing model prediction)
+    player_name = chosen_player_names[i] 
     prediction = chosen_players_scores[i]
-   
-    # print(prediction)
 
-    # Generate LIME explanation for the player's prediction
     exp = explainer.explain_instance(
         player_data_values,  # Player data (features)
         loaded_model.predict,  # The model to explain
@@ -281,7 +223,6 @@ for i, player_data_values in enumerate(chosen_players_encoded):
 
 all_explanations_text = "\n".join(all_explanations)
 
-    # Modify the prompt to include all players' explanations
 # prompt = f"""
 # I am building a fantasy cricket app with an ML model to predict the best players. Here are the explanations for the top 11 players, predicted to perform well based on their fantasy points. The following explanations are generated using LIME for the model's prediction:
 
@@ -289,6 +230,7 @@ all_explanations_text = "\n".join(all_explanations)
 
 # Write a human-interpretable summary of why these players were predicted, mentioning the features that have positively or negatively impacted their fantasy points. Exclude numerical values and focus on the key factors that influenced the prediction.
 # """
+
 prompt = f"""
 I am building a fantasy cricket app with an ML model to predict the best players. Below is a summary of the top 11 players selected based on LIME explanations:
 
@@ -300,10 +242,6 @@ If two or more players have similar explanations, combine them into a single sen
 
 Write all of this in paragraph form, without headings, and ensure the information is clear and concise. All dont give all sentences in same formta try to rephrase them
 """
-
-
-
-
 chat_response = client.chat.complete(
     model = model,
     messages = [
@@ -313,5 +251,4 @@ chat_response = client.chat.complete(
         },
     ]
 )
-
 print(chat_response.choices[0].message.content)

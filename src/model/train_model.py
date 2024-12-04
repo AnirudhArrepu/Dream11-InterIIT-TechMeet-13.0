@@ -16,22 +16,6 @@ from lime.lime_tabular import LimeTabularExplainer
 import joblib
 from sklearn.preprocessing import StandardScaler
 
-# def target_encode_with_smoothing(data, column, target, n_splits=5, smoothing=1):
-#     kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
-#     encoded_values = np.zeros(len(data))
-#     global_mean = data[target].mean()  
-    
-#     for train_idx, val_idx in kf.split(data):
-#         train_data, val_data = data.iloc[train_idx], data.iloc[val_idx]
-#         category_stats = train_data.groupby(column)[target].agg(['mean', 'count'])
-#         category_stats['smoothed_mean'] = (
-#             (category_stats['count'] * category_stats['mean'] + smoothing * global_mean) /
-#             (category_stats['count'] + smoothing)
-#         )
-#         val_encoded = val_data[column].map(category_stats['smoothed_mean'])
-#         encoded_values[val_idx] = val_encoded.fillna(global_mean)  
-    
-#     return encoded_values
 
 def target_encode_with_smoothing(data, column, target, n_splits=5, smoothing=1):
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
@@ -59,23 +43,9 @@ def target_encode_with_smoothing(data, column, target, n_splits=5, smoothing=1):
 file_path = '../data/processed/final.csv'
 df = pd.read_csv(file_path)
 
-# print(df.head())
-# print(df.columns)
-
 X = df.iloc[:, [0, 3, 4, 5, 6]]  
 y = df.iloc[:, 1]           
 X_original = df.iloc[:, [0, 3, 4, 5, 6]]  
-
-# print("Input (X):")
-# print(X.head())
-# print("\nOutput (y):")
-# print(y.head())
-
-# X['Player'] = target_encode_with_smoothing(df, column='Player', target='Fantasy Points')
-# X['Team'] = target_encode_with_smoothing(df, column='Team', target='Fantasy Points')
-# X['Match Date'] = target_encode_with_smoothing(df, column='Match Date', target='Fantasy Points')
-# X['Opponent'] = target_encode_with_smoothing(df, column='Opponent', target='Fantasy Points')
-# X['Match Type'] = target_encode_with_smoothing(df, column='Match Type', target='Fantasy Points')
 
 X['Player'], player_mapping = target_encode_with_smoothing(df, column='Player', target='Fantasy Points')
 X['Team'], team_mapping = target_encode_with_smoothing(df, column='Team', target='Fantasy Points')
@@ -94,7 +64,6 @@ print(y)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=92)
 X_train_orginal, X_test_original, y_train_original, y_test_original = train_test_split(X_original, y, test_size=0.2, random_state=92)\
 
-
 xgb_model = xgb.XGBRegressor(objective='reg:squarederror')
 param_grid = {
     'learning_rate': [0.01, 0.1, 0.2],
@@ -112,11 +81,6 @@ grid_search = GridSearchCV(
     n_jobs=-1   
 )
 grid_search.fit(X_train, y_train)
-
-
-# print("Best Parameters:", grid_search.best_params_)
-# print("Best Score:", grid_search.best_score_)
-
 
 y_pred = grid_search.best_estimator_.predict(X_test)
 x = X_test[:, 0] 
