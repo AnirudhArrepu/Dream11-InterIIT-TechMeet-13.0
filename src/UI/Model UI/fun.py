@@ -48,11 +48,12 @@ def getTestData(startDate, endDate):
             match_key = f"{row['Match Date']}|{teams[0]}|{teams[1]}"
             
             if match_key not in match_dict:
-                match_dict[match_key] = format_match
-                match_dict[match_key]["date"] = row['Match Date'].strftime('%Y-%m-%d')
-                match_dict[match_key]["matchFormat"] = row['Match Type']
-                match_dict[match_key]["team1"]["name"] = teams[0]
-                match_dict[match_key]["team2"]["name"] = teams[1]
+                match_dict[match_key] = {
+                "date": row['Match Date'].strftime('%Y-%m-%d'),
+                "matchFormat": row['Match Type'],
+                "team1": {"name": teams[0], "players": []},
+                "team2": {"name": teams[1], "players": []},
+}
             
             if(row["Team"] == teams[0]):
                 match_dict[match_key]["team1"]["players"].append({"name": row["Player"]})
@@ -67,7 +68,6 @@ def getTestData(startDate, endDate):
             json.dump(match_dict, outfile)
 
 def getGroundTruth(players):
-
     with open('../../data/raw/cricksheet/final/combined_output.csv', 'r') as file:
         df = pd.read_csv(file)
         
@@ -77,29 +77,37 @@ def getGroundTruth(players):
         team2 = players['team2']
         date = players['date']
 
+        # Collect points for team1 players
         for player in team1["players"]:
             name = player["name"]
+            row = df[(df['Player'] == name) & (df['Match Date'] == date)]
 
-            row = df[df['Player']==name & df['Match Date']==date]
+            # Ensure we are extracting 'Fantasy Points' properly
+            if not row.empty:
+                point = row["Fantasy Points"].values[0]
+            else:
+                point = 0  # Handle case where player doesn't have data
 
-            point = row["Fantasy Points"]
+            points.append({"name": name, "points": point})
 
-            points.append({name: point})
-
+        # Collect points for team2 players
         for player in team2["players"]:
             name = player["name"]
+            row = df[(df['Player'] == name) & (df['Match Date'] == date)]
 
-            row = df[df['Player']==name & df['Match Date']==date]
-
-            point = row["Fantasy Points"]
+            if not row.empty:
+                point = row["Fantasy Points"].values[0]
+            else:
+                point = 0  # Handle case where player doesn't have data
 
             points.append({"name": name, "points": point})
 
         return points
 
+
 def getGroundTruthBest11(players):
     points = getGroundTruth(players)
-
+    # points = points.values()
     sorted_points = sorted(points, key=lambda x: x['points'], reverse=True)
 
     top_11 = sorted_points[:11]
@@ -110,7 +118,9 @@ def getGroundTruthBest11(players):
 def savePredictionsMAE():
     with open('modelInput.json', 'r') as jsoninput:
         maes = []
-        for match in jsoninput:
+        data = json.load(jsoninput)
+        
+        for match in data.values():
             date = match['date']
             team1 = match['team1']['name']
             team2 = match['team2']['name']
@@ -118,21 +128,37 @@ def savePredictionsMAE():
             dream_team = predict_model(match)
             ground_team = getGroundTruthBest11(match)
 
-            dream_team_points = sum(player['points'] for player in dream_team)
+            # Extract points from dream_team (always 11 players)
+            points_list = [player['points'] for player in dream_team]
+
+            # Calculate the dream team points with the specified weighting
+            if len(points_list) == 11:
+                max_value = max(points_list)
+                points_list.remove(max_value)
+                second_max_value = max(points_list)
+                
+                # Add max_value twice, second_max_value 1.5 times, and the rest normally
+                dream_team_points = (max_value * 2) + (second_max_value * 1.5) + sum(points_list)
+            else:
+                # This case should not happen as there are always 11 players
+                dream_team_points = sum(points_list)
+
+            # Calculate ground team points (assuming top 11 players from ground truth)
             ground_team_points = sum(player['points'] for player in ground_team)
 
+            # Calculate MAE (Mean Absolute Error)
             mae = abs(dream_team_points - ground_team_points)
-
             maes.append(mae)
 
         return maes
 
 
+
         
 #choose start date and end date for train data
-getTrainingData('2010-12-14', '2024-1-15')
-#then train the model
-model_train('./data/train.csv')
+# getTrainingData('2010-12-14', '2024-1-15')
+# #then train the model
+# model_train('./data/train.csv')
 
 #choose start and end date for test data
 getTestData('2023-12-14', '2023-12-15')
