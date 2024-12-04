@@ -322,7 +322,7 @@ def getPlayerData(matchid):
             name = name.split('(')[0]
             role = name_div.find('span', class_='cb-font-12')
             role_text = role.text.strip() if role else 'Role not specified'
-            if "Coach" in role:
+            if "Coach" or "coach" in role:
                 continue
             players_right.append({'name': name, 'role': role_text})
 
