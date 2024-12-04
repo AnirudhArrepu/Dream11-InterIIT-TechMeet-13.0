@@ -28,7 +28,9 @@ RAPIDAPI_KEY = "10c8c27a68msh957ab42b76eab8cp13a77cjsn68a6f784d660"
 RAPIDAPI_HOST = "cricbuzz-cricket.p.rapidapi.com"
 
 @app.route('/api/cricket-news', methods=['POST'])
+@cache.cached(timeout=1800)
 def get_cricket_news():
+    print("getting news")
     try:
         # Making the request to the RapidAPI cricket news endpoint
         url = "https://cricbuzz-cricket.p.rapidapi.com/news/v1/index"
@@ -95,7 +97,7 @@ def get_cricket_news():
         return jsonify({"message": "Error fetching data from the RapidAPI"}), 500
 
 @app.route('/api/cricket-news/<id>', methods=['GET'])
-@cache.cached()
+@cache.cached(timeout=7200)
 def getNewsURL(id):
     url = f"https://cricbuzz-cricket.p.rapidapi.com/news/v1/detail/{id}"
 
@@ -169,10 +171,14 @@ def getMatchData(param):
 
                 # Extract required details
                 matchid = match_info["matchId"]
-                team1_name = match_info["team1"]["teamSName"]
                 # team1_id = match_info["team1"]["teamId"]
-                team2_name = match_info["team2"]["teamSName"]
+                team1_name = match_info["team1"]["teamSName"]
+                team1id = match_info["team1"]["imageId"]
+                
                 # team2_id = match_info["team2"]["teamId"]
+                team2_name = match_info["team2"]["teamSName"]
+                team2id = match_info["team2"]["imageId"]
+                
                 match_format = match_info["matchFormat"]
                 start_date = match_info["startDate"]
                 stadium = match_info["venueInfo"]["ground"]
@@ -195,9 +201,9 @@ def getMatchData(param):
                 match = {
                     "matchid": matchid,
                     "team1": team1_name,
-                    # "team1id": team1_id,
+                    "team1id": team1id,
                     "team2": team2_name,
-                    # "team2id": team2_id,
+                    "team2id": team2id,
                     "matchFormat": match_format,
                     "date": formatted_date,
                     "time": formatted_time,
@@ -274,6 +280,7 @@ def getFantasyPoints():
     pass
 
 @app.route('/api/cricket-matches/<matchid>/players', methods=['GET'])
+@cache.cached(timeout=7200)
 def getPlayerData(matchid):
     # print(matchid)
     url = f"https://www.cricbuzz.com/cricket-match-squads/{matchid}/as"
