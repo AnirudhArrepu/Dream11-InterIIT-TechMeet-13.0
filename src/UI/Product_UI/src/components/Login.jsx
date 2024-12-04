@@ -25,7 +25,7 @@ const Login = () => {
                 localStorage.setItem("token", data.token);
 
                 // Navigate to the dashboard or homepage after successful login
-                navigate("/matches");
+                navigate("/dashboard");
             } else {
                 alert(data.message || "Login failed!");
             }
@@ -70,14 +70,14 @@ const Login = () => {
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                         Login
                     </button>
                 </form>
                 <p className="mt-4 text-sm text-center">
                     Don't have an account?{" "}
-                    <Link to="/SignUp" className="text-indigo-600 hover:underline">
+                    <Link to="/Signup" className="text-indigo-600 hover:underline">
                         Sign up here
                     </Link>
                 </p>

@@ -12,7 +12,7 @@ const Signup = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch("http://127.0.0.1:5000/SignUp", {
+            const response = await fetch("http://127.0.0.1:5000/Signup", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
@@ -67,14 +67,14 @@ const Signup = () => {
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                         Sign Up
                     </button>
                 </form>
                 <p className="mt-4 text-sm text-center">
                     Already have an account?{" "}
-                    <Link to="/Login" className="text-indigo-600 hover:underline">
+                    <Link to="/login" className="text-indigo-600 hover:underline">
                         Log in here
                     </Link>
                 </p>
