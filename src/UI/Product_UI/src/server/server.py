@@ -15,6 +15,7 @@ db = client["team97db"]  # Replace with your database name
 users_collection = db["Users"]  # Replace with your collection name
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'SasaankJaiminAyushMokshitAnirudh97SudoShankhesh'
 CORS(app)  # Enable CORS for all routes
 
 # Configure Flask-Caching
