@@ -229,5 +229,61 @@ def get_prediction():
 def getFantasyPoints():
     pass
 
+def getPlayerData(matchid):
+    url = f"https://www.cricbuzz.com/cricket-match-squads/{matchid}/as"
+     
+    response = requests.get(url=url)
+
+    # print(response.text)
+
+    # Parse the HTML content
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # print(soup)
+
+    team1 = soup.find('a', class_='cb-team1').find_all('div', class_='pad5')[-1].text.strip()
+    team2 = soup.find('a', class_='cb-team2').find_all('div', class_='pad5')[-1].text.strip()
+
+    # Print the team names
+    print(f"Team 1: {team1}")
+    print(f"Team 2: {team2}")
+
+    # Find all player card elements
+    player_cards_left = soup.find_all('a', class_='cb-player-card-left')
+    player_cards_right = soup.find_all('a', class_='cb-player-card-right')
+
+    # Initialize a list to store player info
+    players_left = []
+    players_right = []
+
+    # Extract player name and role
+    for card in player_cards_left:
+        name_div = card.find('div', class_='cb-player-name-left')
+        if name_div:
+            name = name_div.div.text.strip().split('\n')[0]
+            role = name_div.find('span', class_='cb-font-12')
+            role_text = role.text.strip() if role else 'Role not specified'
+            players_left.append({'Name': name, 'Role': role_text})
+
+    for card in player_cards_right:
+        name_div = card.find('div', class_='cb-player-name-right')
+        if name_div:
+            name = name_div.div.text.strip().split('\n')[0]
+        
+            role = name_div.find('span', class_='cb-font-12')
+            role_text = role.text.strip() if role else 'Role not specified'
+            players_right.append({'Name': name, 'Role': role_text})
+
+    # Print the results
+    for player in players_left:
+        print(f"Name: {player['Name']}, Role: {player['Role']}")
+
+    print('---------------------------------\n\n\n\n\n\n-----------------------------------')
+    for player in players_right:
+        print(f"Name: {player['Name']}, Role: {player['Role']}")
+
+    return jsonify({"team1 players": player_cards_left, "team2 players": player_cards_right})
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
