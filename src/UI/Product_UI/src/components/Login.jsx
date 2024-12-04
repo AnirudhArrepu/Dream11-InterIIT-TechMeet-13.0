@@ -25,7 +25,7 @@ const Login = () => {
                 localStorage.setItem("token", data.token);
 
                 // Navigate to the dashboard or homepage after successful login
-                navigate("/dashboard");
+                navigate("/matches");
             } else {
                 alert(data.message || "Login failed!");
             }

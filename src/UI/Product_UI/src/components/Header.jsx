@@ -5,7 +5,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="bg-red-800 text-white">
+    <header className="bg-gradient-to-r from-red-500 to-red-700 text-white">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-4">
         {/* Logo */}
         <Link to="/" className="text-xl font-bold hover:text-gray-300">
