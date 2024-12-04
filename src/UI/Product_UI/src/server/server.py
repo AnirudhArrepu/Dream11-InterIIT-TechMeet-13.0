@@ -28,6 +28,7 @@ RAPIDAPI_KEY = "10c8c27a68msh957ab42b76eab8cp13a77cjsn68a6f784d660"
 RAPIDAPI_HOST = "cricbuzz-cricket.p.rapidapi.com"
 
 @app.route('/api/cricket-news', methods=['POST'])
+@cache.cached(timeout=1800)
 def get_cricket_news():
     try:
         # Making the request to the RapidAPI cricket news endpoint
@@ -95,7 +96,7 @@ def get_cricket_news():
         return jsonify({"message": "Error fetching data from the RapidAPI"}), 500
 
 @app.route('/api/cricket-news/<id>', methods=['GET'])
-@cache.cached()
+@cache.cached(timeout=7200)
 def getNewsURL(id):
     url = f"https://cricbuzz-cricket.p.rapidapi.com/news/v1/detail/{id}"
 
@@ -274,6 +275,7 @@ def getFantasyPoints():
     pass
 
 @app.route('/api/cricket-matches/<matchid>/players', methods=['GET'])
+@cache.cached(timeout=7200)
 def getPlayerData(matchid):
     # print(matchid)
     url = f"https://www.cricbuzz.com/cricket-match-squads/{matchid}/as"
