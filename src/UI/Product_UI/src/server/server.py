@@ -18,7 +18,7 @@ users_collection = db["Users"]  # Replace with your collection name
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'SasaankJaiminAyushMokshitAnirudh97SudoShankhesh'
+app.config['SECRET_KEY'] = '10c8c27a68msh957ab42b76eab8cp13a77cjsn68a6f784d660'
 CORS(app)  # Enable CORS for all routes
 
 # Configure Flask-Caching
