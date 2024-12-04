@@ -3,6 +3,7 @@ from flask_cors import CORS
 import requests
 from datetime import datetime, timezone
 from flask_caching import Cache
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -13,8 +14,8 @@ app.config['CACHE_DEFAULT_TIMEOUT'] = 300  # Cache timeout in seconds
 cache = Cache(app)
 
 # # RapidAPI credentials
-# RAPIDAPI_KEY = "10c8c27a68msh957ab42b76eab8cp13a77cjsn68a6f784d660"
-# RAPIDAPI_HOST = "cricbuzz-cricket.p.rapidapi.com"
+RAPIDAPI_KEY = "10c8c27a68msh957ab42b76eab8cp13a77cjsn68a6f784d660"
+RAPIDAPI_HOST = "cricbuzz-cricket.p.rapidapi.com"
 
 @app.route('/api/cricket-news', methods=['POST'])
 def get_cricket_news():
@@ -23,8 +24,8 @@ def get_cricket_news():
         url = "https://cricbuzz-cricket.p.rapidapi.com/news/v1/index"
 
         headers = {
-	        "x-rapidapi-key": "10c8c27a68msh957ab42b76eab8cp13a77cjsn68a6f784d660",
-	        "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
+	        "x-rapidapi-key": RAPIDAPI_KEY,
+	        "x-rapidapi-host": RAPIDAPI_HOST
         }
 
         # Sending GET request to the RapidAPI endpoint
@@ -89,8 +90,8 @@ def getNewsURL(id):
     url = f"https://cricbuzz-cricket.p.rapidapi.com/news/v1/detail/{id}"
 
     headers = {
-	    "x-rapidapi-key": "10c8c27a68msh957ab42b76eab8cp13a77cjsn68a6f784d660",
-	    "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
+	    "x-rapidapi-key": RAPIDAPI_KEY,
+	    "x-rapidapi-host": RAPIDAPI_HOST
     }
 
     response = requests.get(url, headers=headers)
@@ -111,12 +112,13 @@ def getMatchData(param):
     url = f"https://cricbuzz-cricket.p.rapidapi.com/matches/v1/{param}"
 
     headers = {
-        "x-rapidapi-key": "d2a20b6689msh6f097e931c446a4p145a20jsn3807682cca7d",
-        "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
+        "x-rapidapi-key": RAPIDAPI_KEY,
+        "x-rapidapi-host": RAPIDAPI_HOST
     }
 
     response = requests.get(url, headers=headers)
     data = response.json()
+    # print(data)
 
     matches = []
 
@@ -124,18 +126,18 @@ def getMatchData(param):
         matchType = type_match["matchType"]
         if matchType=="Women" or matchType=="Domestic":
             continue
-        # if matchType != "International":
-        #     continue
+        
         for series_match in type_match["seriesMatches"]:
             series_info = series_match.get("seriesAdWrapper", {})
             for match in series_info.get("matches", []):
                 match_info = match["matchInfo"]
 
                 # Extract required details
+                matchid = match_info["matchId"]
                 team1_name = match_info["team1"]["teamSName"]
-                team1_id = match_info["team1"]["teamId"]
+                # team1_id = match_info["team1"]["teamId"]
                 team2_name = match_info["team2"]["teamSName"]
-                team2_id = match_info["team2"]["teamId"]
+                # team2_id = match_info["team2"]["teamId"]
                 match_format = match_info["matchFormat"]
                 start_date = match_info["startDate"]
                 stadium = match_info["venueInfo"]["ground"]
@@ -156,65 +158,23 @@ def getMatchData(param):
                     formatted_time = None
 
                 match = {
+                    "matchid": matchid,
                     "team1": team1_name,
-                    "team1id": team1_id,
+                    # "team1id": team1_id,
                     "team2": team2_name,
-                    "team2id": team2_id,
+                    # "team2id": team2_id,
                     "matchFormat": match_format,
                     "date": formatted_date,
                     "time": formatted_time,
                     "stadium": stadium,
                     "status": status,
                     "state": state,
-                    "matchTitle": match_title
+                    "matchTitle": match_title,
                 }
                 matches.append(match)
 
     return jsonify({"matches": matches})
 
-
-@app.route('/api/players/perteam/<teamid>', methods=['GET'])
-def get_players(teamid):
-    url = f"https://cricbuzz-cricket.p.rapidapi.com/teams/v1/{teamid}/players"
-
-    headers = {
-        "x-rapidapi-key": "d2a20b6689msh6f097e931c446a4p145a20jsn3807682cca7d",
-        "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
-    }
-
-    response = requests.get(url, headers=headers)
-    data = response.json()
-
-    players = []
-
-    plers = data["players"]
-
-    for player in plers["playing XI"]:
-        dt = {"name" : player["name"], "role": player["role"]}
-        players.append(dt)
-    
-    for player in plers["bench"]:
-        dt = {"name" : player["name"], "role": player["role"]}
-        players.append(dt)
-
-    return jsonify({"players": players})
-
-
-@app.route('/app/players/role/<playerid>', methods=['GET'])
-def getPlayerData():
-    url = "https://cricbuzz-cricket.p.rapidapi.com/stats/v1/player/6635"
-
-    headers = {
-        "x-rapidapi-key": "d2a20b6689msh6f097e931c446a4p145a20jsn3807682cca7d",
-        "x-rapidapi-host": "cricbuzz-cricket.p.rapidapi.com"
-    }
-
-    response = requests.get(url, headers=headers)
-
-    data = response.json()
-    role = data["role"]
-
-    return jsonify({"role: ", role})
 
 @app.route('/app/model/predict', methods=['POST'])
 def get_prediction():
@@ -229,24 +189,19 @@ def get_prediction():
 def getFantasyPoints():
     pass
 
+@app.route('/api/matches/<matchid>/players', methods=['GET'])
 def getPlayerData(matchid):
     url = f"https://www.cricbuzz.com/cricket-match-squads/{matchid}/as"
-     
+    
     response = requests.get(url=url)
 
-    # print(response.text)
+    # Check if the request was successful
+    if response.status_code != 200:
+        print(f"Failed to retrieve data: {response.status_code}")
+        return
 
     # Parse the HTML content
     soup = BeautifulSoup(response.text, 'html.parser')
-
-    # print(soup)
-
-    team1 = soup.find('a', class_='cb-team1').find_all('div', class_='pad5')[-1].text.strip()
-    team2 = soup.find('a', class_='cb-team2').find_all('div', class_='pad5')[-1].text.strip()
-
-    # Print the team names
-    print(f"Team 1: {team1}")
-    print(f"Team 2: {team2}")
 
     # Find all player card elements
     player_cards_left = soup.find_all('a', class_='cb-player-card-left')
@@ -256,33 +211,36 @@ def getPlayerData(matchid):
     players_left = []
     players_right = []
 
-    # Extract player name and role
+    # Extract player name and role for Team 1 (left)
     for card in player_cards_left:
         name_div = card.find('div', class_='cb-player-name-left')
         if name_div:
-            name = name_div.div.text.strip().split('\n')[0]
+            name = name_div.get_text(separator='', strip=True).split('')[0].strip()
+            name = name.split(' (')[0]
             role = name_div.find('span', class_='cb-font-12')
             role_text = role.text.strip() if role else 'Role not specified'
             players_left.append({'Name': name, 'Role': role_text})
 
+    # Extract player name and role for Team 2 (right)
     for card in player_cards_right:
         name_div = card.find('div', class_='cb-player-name-right')
         if name_div:
-            name = name_div.div.text.strip().split('\n')[0]
-        
+            name = name_div.get_text(separator='', strip=True).split('')[0].strip()
+            name = name.split('(')[0]
             role = name_div.find('span', class_='cb-font-12')
             role_text = role.text.strip() if role else 'Role not specified'
             players_right.append({'Name': name, 'Role': role_text})
 
     # Print the results
+    print("Team 1 Players:")
     for player in players_left:
         print(f"Name: {player['Name']}, Role: {player['Role']}")
 
-    print('---------------------------------\n\n\n\n\n\n-----------------------------------')
+    print('---------------------------------')
+
+    print("Team 2 Players:")
     for player in players_right:
         print(f"Name: {player['Name']}, Role: {player['Role']}")
-
-    return jsonify({"team1 players": player_cards_left, "team2 players": player_cards_right})
 
 
 if __name__ == '__main__':
