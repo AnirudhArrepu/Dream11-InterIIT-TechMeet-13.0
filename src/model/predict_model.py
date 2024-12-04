@@ -6,6 +6,7 @@ from mistralai import Mistral
 import os
 import xgboost as xgb
 from functools import cache
+import math
 
 def load_models():
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -209,7 +210,7 @@ def predict_model(json_data):
         ]
     )
     best11 = [
-        {'Player': name, 'Score': str(score), 'Role': role, 'Team': team}
+        {'Player': name, 'Score': str(math.ceil(score)), 'Role': role, 'Team': team}
         for name, score, role, team in zip(chosen_player_names, chosen_players_scores, chosen_players_roles, chosen_players_teams)
     ]
     final = {

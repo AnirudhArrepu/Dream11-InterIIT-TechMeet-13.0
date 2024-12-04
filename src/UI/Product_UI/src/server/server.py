@@ -240,7 +240,7 @@ def login_page():
     else:
         return jsonify({'message': 'Invalid username or password!'}), 401
 
-@app.route('/SignUp', methods=['POST'])
+@app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
     username = data.get('username')
@@ -263,12 +263,12 @@ def signup():
 
     return jsonify({'message': 'Signup successful! Please log in.'}), 201
 
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    session.pop('username', None)
-    flash('You have been logged out.', 'success')
-    return redirect(url_for('home'))
+# @app.route('/logout')
+# def logout():
+#     session.pop('logged_in', None)
+#     session.pop('username', None)
+#     flash('You have been logged out.', 'success')
+#     return redirect(url_for('home'))
 
 def process_teams(teams):
     updated_teams = []

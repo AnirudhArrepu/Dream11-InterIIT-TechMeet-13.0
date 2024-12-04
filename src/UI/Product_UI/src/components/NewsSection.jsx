@@ -12,10 +12,10 @@ const NewsSection = () => {
       const cachedNews = localStorage.getItem("cricketNews");
       const cachedTimestamp = localStorage.getItem("cricketNewsTimestamp");
 
-      // If cache exists and it's within 1 hour, use the cached data
+      // If cache exists and it's within 30 mins, use the cached data
       if (cachedNews && cachedTimestamp) {
         const currentTime = new Date().getTime();
-        if (currentTime - cachedTimestamp < 3600000) {
+        if (currentTime - cachedTimestamp < 1800000) {
           setNews(JSON.parse(cachedNews));
           setLoading(false);
           return;

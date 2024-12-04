@@ -1,5 +1,9 @@
 import React from "react";
-import { FaRegStar, FaRegThumbsUp, FaChartLine, FaTrophy, FaUsers, FaShieldAlt } from "react-icons/fa";
+import {
+  FaRegStar,
+  FaRegThumbsUp,
+  FaChartLine,
+} from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const Home = () => {
@@ -12,7 +16,8 @@ const Home = () => {
           backgroundImage: `url('/lords.jpg')`, // Replace with your Lord's image path
         }}
       >
-        <div className="absolute inset-0 bg-black bg-opacity-40"></div> {/* Changed from bg-opacity-50 to bg-opacity-70 */}
+        <div className="absolute inset-0 bg-black bg-opacity-40"></div>{" "}
+        {/* Changed from bg-opacity-50 to bg-opacity-70 */}
         <div className="relative z-10 text-white px-6 lg:px-0 max-w-4xl">
           <h1 className="text-5xl font-extrabold mb-6">
             Elevate Your Fantasy Cricket Experience
@@ -21,9 +26,11 @@ const Home = () => {
             Combining the love for cricket with the power of AI to provide
             real-time predictions and insights.
           </p>
-          <button className="bg-red-600 text-white py-3 px-8 rounded-lg text-lg hover:bg-red-700 transition duration-300">
-            Get Started Now
-          </button>
+          <Link to="/signup">
+            <button className="bg-red-600 text-white py-3 px-8 rounded-lg text-lg hover:bg-red-700 transition duration-300">
+              Get Started Now
+            </button>
+          </Link>
         </div>
       </div>
 
@@ -60,7 +67,9 @@ const Home = () => {
               Leverage advanced analytics to create winning teams and improve
               your chances of success.
             </p>
-            <button className="text-red-600 hover:underline">Explore Now</button>
+            <button className="text-red-600 hover:underline">
+              Explore Now
+            </button>
           </div>
 
           {/* Feature 3 */}
@@ -75,7 +84,9 @@ const Home = () => {
               Our intuitive interface ensures a seamless experience for all
               users, from beginners to pros.
             </p>
-            <button className="text-red-600 hover:underline">View Features</button>
+            <button className="text-red-600 hover:underline">
+              View Features
+            </button>
           </div>
         </div>
       </div>
@@ -129,7 +140,6 @@ const Home = () => {
             Sign up here
           </button>
         </Link>
-
       </div>
     </div>
   );
