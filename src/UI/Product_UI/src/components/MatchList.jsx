@@ -62,7 +62,7 @@ const MatchList = () => {
       const cachedData = localStorage.getItem(`matches_${param}`);
       if (cachedData) {
         const { timestamp, matches } = JSON.parse(cachedData);
-        const oneHour = 60 * 60 * 1000;
+        const oneHour = 30 * 60 * 1000;
         if (Date.now() - timestamp < oneHour) {
           setMatches(matches);
           return;

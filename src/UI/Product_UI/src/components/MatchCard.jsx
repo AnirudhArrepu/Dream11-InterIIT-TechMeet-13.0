@@ -6,6 +6,7 @@ const MatchCard = ({ match }) => {
       {/* Match Info */}
       <div className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-700 text-white flex justify-between items-center rounded-t-lg">
         <span className="text-sm font-semibold">{match.matchFormat}</span>
+        {/* <span className="text-sm font-semibold">{match.matchType}</span> */}
         <span
           className={`text-xs font-semibold px-2 py-1 rounded ${
             match.status === "In Progress"

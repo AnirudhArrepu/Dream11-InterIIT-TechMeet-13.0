@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response, render_template, session, flash, redirect, url_for
+from flask import Flask, request, jsonify, session, flash, redirect, url_for
 from flask_cors import CORS
 import requests
 from datetime import datetime, timezone, timedelta
@@ -7,6 +7,9 @@ import jwt
 from functools import wraps
 from pymongo import MongoClient
 from werkzeug.security import check_password_hash, generate_password_hash
+import sys
+sys.path.append('../../../../model')
+from predict_model import predict_model
 
 MONGO_URI = "mongodb+srv://shankhesh01:qRxyuHlQGRL0BrpA@team97sudo.fkb7v.mongodb.net/?retryWrites=true&w=majority&appName=Team97sudo"
 client = MongoClient(MONGO_URI)
@@ -205,6 +208,7 @@ def getMatchData(param):
                     "team2": team2_name,
                     "team2id": team2id,
                     "matchFormat": match_format,
+                    "matchType": matchType,
                     "date": formatted_date,
                     "time": formatted_time,
                     "stadium": stadium,
@@ -266,18 +270,59 @@ def logout():
     flash('You have been logged out.', 'success')
     return redirect(url_for('home'))
 
+def process_teams(teams):
+    updated_teams = []
+    # print(teams)
+    
+    for team_key in teams:
+        # print(team_key)
+        team = teams[team_key]
+        # print(team)
+        updated_players = []
+
+        for player in team:
+            updated_role = player["role"]
+
+            if updated_role == '':
+                continue
+            
+            # Remove the "WK-" part from the role, if it exists
+            if "WK-" in updated_role:
+                updated_role = "Wicketkeeper"
+            
+            # If role has a space, take the second word
+            if " " in updated_role:
+                updated_role = updated_role.split(" ")[1]  # Take the second word
+            
+            # Add the player with the updated role to the updated players list
+            updated_players.append({
+                "name": player["name"],
+                "role": updated_role
+            })
+        
+        # Update the team with the processed players
+        updated_teams.append(updated_players)
+    
+    return updated_teams
+
 @app.route('/app/model/predict', methods=['POST'])
 def get_prediction():
     data = request.get_json()
+    # print(data)
+    match = data["match"]
+    teams = process_teams(data["teams"])
 
-    player_names = data['player_names']
+    model_input = {}
+    model_input["date"] = match["date"]
+    model_input["matchFormat"] = match["matchFormat"]
+    model_input["team1"] = { "name": match["team1"], "players": teams[0] }
+    model_input["team2"] = { "name": match["team2"], "players": teams[1] }
 
-    predictions = [getFantasyPoints(name) for name in player_names]
+    # print(model_input)
+    response = predict_model(model_input)
+    # print(response)
 
-    return jsonify({"predictions": predictions}), 200
-
-def getFantasyPoints():
-    pass
+    return jsonify({"predictions": response}), 200
 
 @app.route('/api/cricket-matches/<matchid>/players', methods=['GET'])
 @cache.cached(timeout=7200)
@@ -312,6 +357,8 @@ def getPlayerData(matchid):
             name = name.split(' (')[0]
             role = name_div.find('span', class_='cb-font-12')
             role_text = role.text.strip() if role else 'Role not specified'
+            if "Coach" in role_text or "coach" in role_text:
+                continue
             players_left.append({'name': name, 'role': role_text})
 
     # Extract player name and role for Team 2 (right)
@@ -322,7 +369,7 @@ def getPlayerData(matchid):
             name = name.split('(')[0]
             role = name_div.find('span', class_='cb-font-12')
             role_text = role.text.strip() if role else 'Role not specified'
-            if "Coach" or "coach" in role:
+            if "Coach" in role_text or "coach" in role_text:
                 continue
             players_right.append({'name': name, 'role': role_text})
 
