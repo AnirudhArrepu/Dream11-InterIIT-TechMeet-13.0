@@ -1,8 +1,10 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify, make_response, render_template, session, flash, redirect, url_for
 from flask_cors import CORS
 import requests
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from flask_caching import Cache
+import jwt
+from functools import wraps
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -106,7 +108,32 @@ def getNewsURL(id):
         return jsonify({"url": url})
 
 
+def token_required(func):
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        token = request.args.get('token')
+        if not token:
+            return jsonify({'Alert!': 'Token is missing!'}), 401
+
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            return jsonify({'Message': 'Token has expired'}), 403
+        except jwt.InvalidTokenError:
+            return jsonify({'Message': 'Invalid token'}), 403
+
+        return func(*args, **kwargs)
+    return decorated
+
+
+@app.route('/auth')
+@token_required
+def auth():
+    return 'JWT is verified. Welcome to your dashboard!'
+
+
 @app.route('/api/cricket-matches/<param>', methods=['POST'])
+@token_required  # Protect this route with the token_required decorator
 def getMatchData(param):
     url = f"https://cricbuzz-cricket.p.rapidapi.com/matches/v1/{param}"
 
@@ -199,6 +226,55 @@ def get_players(teamid):
 
     return jsonify({"players": players})
 
+@app.route('/login', methods=['POST'])
+def login_page():
+    if request.method == 'POST':
+        data = request.get_json()
+        username = data.get("username")
+        password = data.get("password")
+
+        # Validate username and password
+        if username in users and users[username] == password:
+            session['logged_in'] = True
+            session['username'] = username  # Store username in session
+
+            # Generate JWT token
+            token = jwt.encode({
+                'user': username,
+                'exp': datetime.utcnow() + timedelta(seconds=60)
+            }, app.config['SECRET_KEY'], algorithm="HS256")
+
+            return jsonify({'token': token, 'message': 'Login successful!'}), 200
+        else:
+            return jsonify({'message': 'Invalid username or password!'}), 401
+
+
+
+@app.route('/SignUp', methods=['POST','GET'])
+def signup():
+    data = request.get_json()  # Parse JSON data from the request
+    username = data.get('username')
+    password = data.get('password')
+    
+    # Ensure username and password are provided
+    if not username or not password:
+        return jsonify({'message': 'Username and password are required!'}), 400
+    
+    # Ensure username is unique
+    if username in users:
+        return jsonify({'message': 'Username already exists! Please choose a different one.'}), 409
+    
+    # Register the user
+    users[username] = password
+    return jsonify({'message': 'Signup successful! Please log in.'}), 201
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    session.pop('username', None)
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('home'))
+
 
 @app.route('/app/players/role/<playerid>', methods=['GET'])
 def getPlayerData():
@@ -283,6 +359,7 @@ def getPlayerData(matchid):
         print(f"Name: {player['Name']}, Role: {player['Role']}")
 
     return jsonify({"team1 players": player_cards_left, "team2 players": player_cards_right})
+
 
 
 if __name__ == '__main__':
