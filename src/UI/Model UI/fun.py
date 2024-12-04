@@ -114,49 +114,85 @@ def getGroundTruthBest11(players):
 
     return top_11
 
+import csv
 
 def savePredictionsMAE():
     maes = []
     mapes = []
     
+    # Open and read the input JSON file
     with open('modelInput.json', 'r') as jsoninput:
         data = json.load(jsoninput)
         
-        for match in data.values():
-            date = match['date']
-            team1 = match['team1']['name']
-            team2 = match['team2']['name']
+        # Open the CSV file in append mode
+        with open('predictions.csv', 'a', newline='') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            
+            # Check if the file is empty to write the header row only once
+            file_empty = csvfile.tell() == 0
+            if file_empty:
+                # Write the header row to the CSV file
+                header = ['Date', 'Team1', 'Team2'] + \
+                         [f'DreamPlayer{i}_Name' for i in range(1, 12)] + [f'DreamPlayer{i}_Points' for i in range(1, 12)] + \
+                         [f'GroundPlayer{i}_Name' for i in range(1, 12)] + [f'GroundPlayer{i}_Points' for i in range(1, 12)] + ['MAE', 'MAPE']
+                csv_writer.writerow(header)
+            
+            # Process each match in the JSON file
+            for match in data.values():
+                date = match['date']
+                team1 = match['team1']['name']
+                team2 = match['team2']['name']
 
-            dream_team = predict_model(match)
-            ground_team = getGroundTruthBest11(match)
+                dream_team = predict_model(match)
+                ground_team = getGroundTruthBest11(match)
 
-            # Extract points from dream_team (always 11 players)
-            points_list = [player['points'] for player in dream_team]
-            actual_points_list = [player['points'] for player in ground_team]
+                # Extract points from dream_team (always 11 players)
+                points_list = [player['points'] for player in dream_team]
+                actual_points_list = [player['points'] for player in ground_team]
 
-            # Calculate the dream team points with the specified weighting
-            if len(points_list) == 11:
-                max_value = max(points_list)
-                points_list.remove(max_value)
-                second_max_value = max(points_list)
+                # Calculate the dream team points with the specified weighting
+                if len(points_list) == 11:
+                    max_value = max(points_list)
+                    points_list.remove(max_value)
+                    second_max_value = max(points_list)
+                    
+                    # Add max_value twice, second_max_value 1.5 times, and the rest normally
+                    dream_team_points = (max_value * 2) + (second_max_value * 1.5) + sum(points_list)
+                else:
+                    # This case should not happen as there are always 11 players
+                    dream_team_points = sum(points_list)
+
+                # Calculate ground team points (assuming top 11 players from ground truth)
+                ground_team_points = sum(actual_points_list)
+
+                # Calculate MAE (Mean Absolute Error)
+                mae = abs(dream_team_points - ground_team_points)
+                maes.append(mae)
+
+                # Calculate MAPE (Mean Absolute Percentage Error)
+                if ground_team_points != 0:  # Prevent division by zero
+                    mape = (abs(dream_team_points - ground_team_points) / ground_team_points) * 100
+                    mapes.append(mape)
+
+                # Prepare the row for the CSV file
+                row = [date, team1, team2]
                 
-                # Add max_value twice, second_max_value 1.5 times, and the rest normally
-                dream_team_points = (max_value * 2) + (second_max_value * 1.5) + sum(points_list)
-            else:
-                # This case should not happen as there are always 11 players
-                dream_team_points = sum(points_list)
+                # Add dream team players' names and points
+                for player in dream_team:
+                    row.append(player['name'])
+                    row.append(player['points'])
+                
+                # Add ground team players' names and points
+                for player in ground_team:
+                    row.append(player['name'])
+                    row.append(player['points'])
 
-            # Calculate ground team points (assuming top 11 players from ground truth)
-            ground_team_points = sum(actual_points_list)
-
-            # Calculate MAE (Mean Absolute Error)
-            mae = abs(dream_team_points - ground_team_points)
-            maes.append(mae)
-
-            # Calculate MAPE (Mean Absolute Percentage Error)
-            if ground_team_points != 0:  # Prevent division by zero
-                mape = (abs(dream_team_points - ground_team_points) / ground_team_points) * 100
-                mapes.append(mape)
+                # Add MAE and MAPE values
+                row.append(mae)
+                row.append(mape)
+                
+                # Write the row to the CSV file
+                csv_writer.writerow(row)
 
         # Calculate averages for MAE and MAPE
         avg_mae = sum(maes) / len(maes) if maes else 0
