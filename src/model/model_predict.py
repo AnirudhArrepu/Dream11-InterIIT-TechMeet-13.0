@@ -218,10 +218,14 @@ def predict_model(json_data):
             },
         ]
     )
-    chosen_players_df = pd.DataFrame({
-    'Player': chosen_player_names,
-    'Score': chosen_players_scores,
-    'Role': chosen_players_roles
-    })
-    return chosen_players_df, chat_response.choices[0].message.content
+    best11 = [
+        {'Player': name, 'Score': score, 'Role': role}
+        for name, score, role in zip(chosen_player_names, chosen_players_scores, chosen_players_roles)
+    ]
+    final = {
+        'best11': best11,  # List of dictionaries for top 11 players
+        'text': chat_response.choices[0].message.content  # Explanation text from the model response
+    }
+   
+    return final
 
