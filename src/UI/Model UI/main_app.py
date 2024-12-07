@@ -2,6 +2,8 @@ import streamlit as st
 from datetime import date
 import pandas as pd
 import json
+import sys
+sys.path.append('./model_')
 from train_model import model_train
 from predict_model import predict_model
 # from datetime import DateTime
