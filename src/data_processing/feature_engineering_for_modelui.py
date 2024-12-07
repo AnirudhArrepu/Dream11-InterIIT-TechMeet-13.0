@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 directory = '../data/raw/cricksheet-raw'
-output_directory = "../data/interim/product-ui"
+output_directory = "../data/interim/model-ui"
 os.makedirs(output_directory, exist_ok=True)
 
 # Loop through all files in the directory
@@ -22,16 +22,14 @@ for filename in os.listdir(directory):
             data = json.load(file)
 
             match_date = data['info']['dates'][0]
-            check_date = "2014-01-01"
-            last_date = "2024-06-30"
+            check_date = "2000-01-01"
 
             # Parse the dates using the correct format
             date1 = datetime.strptime(match_date, "%Y-%m-%d")
             date2 = datetime.strptime(check_date, "%Y-%m-%d")
-            date3 = datetime.strptime(last_date, "%Y-%m-%d")
 
             # Move the file if the match date is after the check date
-            if date1 > date2 and date1 < date3:
+            if date1 > date2:
 
 
 # Initialize a dictionary to store player stats

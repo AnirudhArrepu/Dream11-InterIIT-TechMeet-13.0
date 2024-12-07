@@ -1,23 +1,36 @@
+import os
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import KFold, train_test_split, GridSearchCV
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import mean_absolute_error
+import logging
+from lime.lime_tabular import LimeTabularExplainer
+import xgboost as xgb
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import learning_curve
+from lime.lime_tabular import LimeTabularExplainer
 import joblib
+import hashlib
+from collections import defaultdict
 from lime.lime_tabular import LimeTabularExplainer
 from mistralai import Mistral
-import os
-import xgboost as xgb
-from functools import cache
-import math
+
+
+
 
 def load_models():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(script_dir, 'xgb_model_best.pkl')
-    loaded_model = joblib.load(model_path)
-    encodings_path = os.path.join(script_dir, 'encodings.pkl')
-    encodings = joblib.load(encodings_path)
+    loaded_model = joblib.load('xgb_model_best.pkl')
+    encodings = joblib.load('encodings.pkl')
     return loaded_model,encodings
+
 
 def apply_encoding(df, encoding_dict, column_name, global_mean):
     return df[column_name].map(encoding_dict).fillna(global_mean)
+
 
 def process_json_to_dataframe(json_data):
     match_date = json_data["date"]
@@ -58,7 +71,8 @@ def process_json_to_dataframe(json_data):
     df = df[["Player", "Match Date", "Team", "Opponent", "Match Type", "Role"]]
     return df, player_role_mapping
 
-def predict_players(X, loaded_model, encodings):
+
+def predict_players(X, loaded_model, player_role_mapping, X_original, encodings):
     player_encoding, team_encoding, match_date_encoding, opponent_encoding, match_type_encoding = encodings
     global_mean_player = np.mean(list(player_encoding.values()))
     global_mean_team = np.mean(list(team_encoding.values()))
@@ -126,17 +140,12 @@ def select_top_players(predictions, player_role_mapping, X_original, roles, all_
         if len(chosen_players) < 11:
             chosen_players.append((player, score))
 
-    chosen_players = sorted(chosen_players, key=lambda x: x[1], reverse=True)
-
     chosen_player_names = [player[0] for player in chosen_players]
     chosen_players_scores = [player[1] for player in chosen_players]
-    chosen_players_teams = X_original[X_original['Player'].isin(chosen_player_names)]['Team'].values
     chosen_players_encoded = X[X_original['Player'].isin(chosen_player_names)]
-    chosen_players_df = X_original[X_original['Player'].isin(chosen_player_names)].copy()
-    chosen_players_df.iloc[0, chosen_players_df.columns.get_loc('Role')] += " (Captain)"
-    chosen_players_df.iloc[1, chosen_players_df.columns.get_loc('Role')] += " (Vice-Captain)"
-    chosen_players_roles = chosen_players_df['Role']
-    return chosen_player_names, chosen_players_scores, chosen_players_encoded, chosen_players_roles, chosen_players_teams
+    chosen_players_roles = X_original[X_original['Player'].isin(chosen_player_names)]['Role']
+    return chosen_player_names, chosen_players_scores, chosen_players_encoded, chosen_players_roles
+
 
 def explain_predictions(chosen_player_names, chosen_players_scores, chosen_players_encoded, X, loaded_model):
     feature_names = [ 'Player' , 'Match Date', 'Team', 'Opponent', 'Match Type']
@@ -177,15 +186,15 @@ def predict_model(json_data):
     X = X.iloc[:, :-1] 
     all_teams = set(X['Team'].unique())
     all_teams = list(all_teams)
-    predictions = predict_players(X, loaded_model, encodings)
+    predictions = predict_players(X, loaded_model, player_role_mapping, X_original, encodings)
     X = X.values
     roles = {
-        "Batter": {},
+        "Batsman": {},
         "Bowler": {},
-        "Allrounder": {},
-        "Wicketkeeper": {}
+        "All-Rounder": {},
+        "Wicket-Keeper": {}
     }
-    chosen_player_names, chosen_players_scores, chosen_players_encoded, chosen_players_roles, chosen_players_teams = select_top_players(predictions, player_role_mapping, X_original, roles, all_teams, X)
+    chosen_player_names, chosen_players_scores, chosen_players_encoded, chosen_players_roles = select_top_players(predictions, player_role_mapping, X_original, roles, all_teams, X)
     all_explanations_text = explain_predictions(chosen_player_names, chosen_players_scores, chosen_players_encoded, X, loaded_model)
     model = "mistral-large-latest"
     client = Mistral(api_key="r2OC0XPdCa4VSwkarNCP53PVdlWStSJ1")
@@ -210,8 +219,8 @@ def predict_model(json_data):
         ]
     )
     best11 = [
-        {'Player': name, 'Score': str(math.ceil(score)), 'Role': role, 'Team': team}
-        for name, score, role, team in zip(chosen_player_names, chosen_players_scores, chosen_players_roles, chosen_players_teams)
+        {'Player': name, 'Score': score, 'Role': role}
+        for name, score, role in zip(chosen_player_names, chosen_players_scores, chosen_players_roles)
     ]
     final = {
         'best11': best11,  # List of dictionaries for top 11 players
@@ -219,3 +228,4 @@ def predict_model(json_data):
     }
    
     return final
+

@@ -2,8 +2,8 @@ import pandas as pd
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-csv_directory = "../data/raw/cricksheet/interim"
-output_directory = "../data/raw/cricksheet/final"
+csv_directory = "../data/raw/data.json"
+output_directory = "../data/interim"
 os.makedirs(output_directory, exist_ok=True)
 
 def process_file(filename):

@@ -15,22 +15,7 @@ from sklearn.model_selection import learning_curve
 from lime.lime_tabular import LimeTabularExplainer
 import joblib
 from sklearn.preprocessing import StandardScaler
-# def target_encode_with_smoothing(data, column, target, n_splits=5, smoothing=1):
-#     kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
-#     encoded_values = np.zeros(len(data))
-#     global_mean = data[target].mean()  
-    
-#     for train_idx, val_idx in kf.split(data):
-#         train_data, val_data = data.iloc[train_idx], data.iloc[val_idx]
-#         category_stats = train_data.groupby(column)[target].agg(['mean', 'count'])
-#         category_stats['smoothed_mean'] = (
-#             (category_stats['count'] * category_stats['mean'] + smoothing * global_mean) /
-#             (category_stats['count'] + smoothing)
-#         )
-#         val_encoded = val_data[column].map(category_stats['smoothed_mean'])
-#         encoded_values[val_idx] = val_encoded.fillna(global_mean)  
-    
-#     return encoded_values
+
 def target_encode_with_smoothing(data, column, target, n_splits=5, smoothing=1):
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
     encoded_values = np.zeros(len(data))

@@ -44,7 +44,7 @@ def getFinalName(name, df, df_combined) -> str:
 # # Updated URL for direct download
 # file_id = "1okg9VX3K_KXJVMmTe5pEW4dpyH9XOBfX"
 # url = f"https://drive.google.com/uc?export=download&id={file_id}"
-local_filename = "names.csv"
+local_filename = "../data/raw/names.csv"
 
 # print("Downloading file...")
 # response = requests.get(url, stream=True)
@@ -61,7 +61,7 @@ local_filename = "names.csv"
 # Load the CSV into a pandas DataFrame
 df = pd.read_csv(local_filename, header=None, names=["ID", "Name"])
 
-combined_df_path = "../data/raw/cricksheet/final/combined_output.csv"
+combined_df_path = "../data/interim/combined_output.csv"
 df_combined = pd.read_csv(combined_df_path, header =None, names=['Player','Fantasy Points','Player Code','Match Date','Team','Opponent','Match Type'])
 
 # Process all unique names in the Player column

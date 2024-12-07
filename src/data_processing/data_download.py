@@ -13,7 +13,6 @@ with open(local_filename, 'wb') as file:
     file.write(response.content)
 print("Download complete.")
 
-# Step 2: Extract the ZIP file
 extracted_folder = "all_json"
 print("Extracting files...")
 with zipfile.ZipFile(local_filename, 'r') as zip_ref:
@@ -21,12 +20,12 @@ with zipfile.ZipFile(local_filename, 'r') as zip_ref:
 print("Extraction complete.")
 
 # Step 3: Rename the extracted folder
-new_folder_name = "cricsheet-raw"  # Specify the new name for the folder
+new_folder_name = "cricksheet-raw"  # Specify the new name for the folder
 os.rename(extracted_folder, new_folder_name)
 print(f"Folder renamed to {new_folder_name}.")
 
 # Step 4: Move the renamed folder to another directory
-destination_folder = "../data/raw/cricksheet"  # Specify your destination directory
+destination_folder = "../data/raw"  # Specify your destination directory
 if not os.path.exists(destination_folder):
     os.makedirs(destination_folder)  # Create the destination directory if it doesn't exist
 
