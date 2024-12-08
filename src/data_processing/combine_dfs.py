@@ -2,7 +2,7 @@ import pandas as pd
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-csv_directory = "../data/raw/data.json"
+csv_directory = "../data/interim/product-ui"
 output_directory = "../data/interim"
 os.makedirs(output_directory, exist_ok=True)
 

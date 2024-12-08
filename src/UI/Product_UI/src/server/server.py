@@ -341,6 +341,14 @@ def getPlayerData(matchid):
     # Parse the HTML content
     soup = BeautifulSoup(response.text, 'html.parser')
 
+    team_left = soup.find('a', class_='cb-team1')
+    team_right = soup.find('a', class_='cb-team2')
+
+    team1_name = team_left.get_text()
+    team2_name = team_right.get_text()
+
+
+
     # Find all player card elements
     player_cards_left = soup.find_all('a', class_='cb-player-card-left')
     player_cards_right = soup.find_all('a', class_='cb-player-card-right')
@@ -384,7 +392,7 @@ def getPlayerData(matchid):
     # for player in players_right:
     #     print(f"Name: {player['name']}, Role: {player['role']}")
 
-    return jsonify({"team1": players_left, "team2": players_right})
+    return jsonify({"team1_name": team1_name,"team2_name":team2_name, "team1": players_left, "team2": players_right})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
